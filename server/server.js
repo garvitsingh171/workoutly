@@ -11,8 +11,20 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
+
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(express.json());
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ message: 'Server is running!' });
+});
 
 // Routes
 app.use('/api/users', require('./src/routes/userRoutes'));
