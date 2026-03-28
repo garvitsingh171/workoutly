@@ -1,18 +1,20 @@
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, loading, isAuthenticated, logout } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div style={styles.container}>
@@ -31,7 +33,7 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <button style={styles.logoutButton} onClick={handleLogout}>
+      <button style={styles.logoutButton} onClick={logout}>
         Logout
       </button>
     </div>

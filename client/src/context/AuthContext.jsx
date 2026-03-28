@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -33,41 +34,43 @@ const clearStoredAuth = () => {
   localStorage.removeItem(USER_KEY);
 };
 
-const getInitialAuthState = () => {
-  const storedToken = localStorage.getItem(TOKEN_KEY);
-  const storedUser = localStorage.getItem(USER_KEY);
-
-  if (!storedToken || !storedUser) {
-    return { user: null, token: null };
-  }
-
-  if (isTokenExpired(storedToken)) {
-    clearStoredAuth();
-    return { user: null, token: null };
-  }
-
-  try {
-    return {
-      token: storedToken,
-      user: JSON.parse(storedUser),
-    };
-  } catch {
-    clearStoredAuth();
-    return { user: null, token: null };
-  }
-};
-
 export const AuthProvider = ({ children }) => {
-  const initialAuthState = useMemo(() => getInitialAuthState(), []);
-  const [user, setUser] = useState(initialAuthState.user);
-  const [token, setToken] = useState(initialAuthState.token);
-  const [loading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
+
+    if (!storedToken || !storedUser) {
+      setLoading(false);
+      return;
+    }
+
+    if (isTokenExpired(storedToken)) {
+      clearStoredAuth();
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    } catch {
+      clearStoredAuth();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     clearStoredAuth();
-  }, []);
+    navigate('/login');
+  }, [navigate]);
 
   const login = useCallback((userData, userToken) => {
     if (isTokenExpired(userToken)) {
@@ -82,7 +85,9 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   }, [logout]);
 
-  const isAuthenticated = Boolean(token && user);
+  const isAuthenticated = useCallback(() => {
+    return Boolean(token && user);
+  }, [token, user]);
 
   const value = useMemo(
     () => ({

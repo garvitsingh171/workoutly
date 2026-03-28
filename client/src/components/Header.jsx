@@ -1,14 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   return (
     <header style={styles.header}>
@@ -16,18 +10,18 @@ const Header = () => {
         <Link to="/" style={styles.link}>Workoutly</Link>
       </div>
       <nav style={styles.nav}>
-        {!isAuthenticated && (
+        {!isAuthenticated() && (
           <>
             <Link to="/login" style={styles.link}>Login</Link>
             <Link to="/register" style={styles.link}>Register</Link>
           </>
         )}
 
-        {isAuthenticated && (
+        {isAuthenticated() && (
           <>
             <Link to="/dashboard" style={styles.link}>Dashboard</Link>
             <span style={styles.userText}>Hi, {user?.name || 'User'}</span>
-            <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+            <button style={styles.logoutBtn} onClick={logout}>Logout</button>
           </>
         )}
       </nav>

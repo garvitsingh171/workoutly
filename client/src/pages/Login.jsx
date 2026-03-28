@@ -12,9 +12,17 @@ const Login = () => {
   const [apiError, setApiError] = useState('');
 
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, loading } = useAuth();
 
-  if (isAuthenticated) {
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (isAuthenticated()) {
     return <Navigate to="/dashboard" replace />;
   }
 
