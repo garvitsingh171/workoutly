@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,14 +13,11 @@ const Login = () => {
   const [apiError, setApiError] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="page-state">
-        <p>Loading...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Checking authentication..." />;
   }
 
   if (isAuthenticated()) {
@@ -83,7 +81,8 @@ const Login = () => {
         return;
       }
 
-      navigate('/dashboard');
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch {
       setApiError('Unable to connect to server. Please try again.');
     } finally {
