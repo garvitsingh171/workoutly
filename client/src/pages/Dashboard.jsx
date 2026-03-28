@@ -6,7 +6,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div className="page-state">
         <p>Loading...</p>
       </div>
     );
@@ -17,62 +17,29 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Dashboard</h2>
-      <p style={styles.subtext}>You are logged in successfully.</p>
+    <section className="page page-dashboard">
+      <div className="dashboard-wrap">
+        <h2 className="dashboard-title">Dashboard</h2>
+        <p className="dashboard-subtext">You are logged in successfully.</p>
 
-      <div style={styles.card}>
-        <p style={styles.item}>
-          <strong>Name:</strong> {user?.name || 'N/A'}
-        </p>
-        <p style={styles.item}>
-          <strong>Email:</strong> {user?.email || 'N/A'}
-        </p>
-        <p style={styles.item}>
-          <strong>User ID:</strong> {user?._id || 'N/A'}
-        </p>
+        <div className="dashboard-card">
+          <p className="dashboard-item">
+            <strong>Name:</strong> {user?.name || 'N/A'}
+          </p>
+          <p className="dashboard-item">
+            <strong>Email:</strong> {user?.email || 'N/A'}
+          </p>
+          <p className="dashboard-item">
+            <strong>User ID:</strong> {user?._id || 'N/A'}
+          </p>
+        </div>
+
+        <button className="btn btn-danger" onClick={logout}>
+          Logout
+        </button>
       </div>
-
-      <button style={styles.logoutButton} onClick={logout}>
-        Logout
-      </button>
-    </div>
+    </section>
   );
-};
-
-const styles = {
-  container: {
-    padding: '2rem',
-    textAlign: 'center',
-  },
-  heading: {
-    marginBottom: '0.5rem',
-  },
-  subtext: {
-    color: '#666',
-    marginBottom: '1.5rem',
-  },
-  card: {
-    maxWidth: '420px',
-    margin: '0 auto 1.5rem',
-    padding: '1rem',
-    border: '1px solid #e2e2e2',
-    borderRadius: '8px',
-    backgroundColor: '#fafafa',
-    textAlign: 'left',
-  },
-  item: {
-    margin: '0.5rem 0',
-  },
-  logoutButton: {
-    padding: '0.75rem 1.25rem',
-    border: 'none',
-    borderRadius: '6px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    cursor: 'pointer',
-    fontWeight: '600',
-  },
 };
 
 export default Dashboard;

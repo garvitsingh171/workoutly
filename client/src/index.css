@@ -1,21 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+
 :root {
-  --bg-page: #f8f9fa;
-  --bg-surface: #ffffff;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --border-muted: #dddddd;
-  --brand-primary: #007bff;
-  --danger: #dc3545;
-  --success-bg: #d4edda;
-  --success-text: #155724;
-  --success-border: #c3e6cb;
-  --error-bg: #f8d7da;
-  --error-text: #721c24;
-  --error-border: #f5c6cb;
-  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --bg: #f2f7fb;
+  --surface: #ffffff;
+  --text-strong: #13233d;
+  --text-muted: #5f6f88;
+  --line-soft: #cad5e3;
+
+  --brand: #12b091;
+  --brand-strong: #0f8c73;
+
+  --danger: #e34c53;
+  --danger-bg: #fdebed;
+  --danger-line: #f6c5ca;
+  --danger-ink: #9f2630;
+
+  --success-bg: #e8f9f3;
+  --success-line: #bdebd8;
+  --success-ink: #12684e;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -25,13 +32,55 @@ body,
   min-height: 100%;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-primary);
-  background-color: var(--bg-page);
+  color: var(--text-strong);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  background:
+    linear-gradient(180deg, rgba(242, 247, 251, 1), rgba(236, 245, 250, 1)),
+    radial-gradient(circle at 10% 10%, rgba(18, 176, 145, 0.08), transparent 35%),
+    radial-gradient(circle at 95% 20%, rgba(255, 120, 71, 0.1), transparent 38%);
+  background-attachment: fixed;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  font-family: "Space Grotesk", "Manrope", sans-serif;
+  letter-spacing: 0.2px;
+}
+
+p {
+  margin-top: 0;
 }
 
 a {
-  color: var(--brand-primary);
+  color: var(--brand-strong);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: rgba(18, 176, 145, 0.22);
+  color: #0e2132;
 }

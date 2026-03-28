@@ -5,64 +5,28 @@ const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
 
   return (
-    <header style={styles.header}>
-      <div style={styles.logo}>
-        <Link to="/" style={styles.link}>Workoutly</Link>
+    <header className="site-header">
+      <div className="site-header__logo-wrap">
+        <Link to="/" className="site-header__logo-link">Workoutly</Link>
       </div>
-      <nav style={styles.nav}>
+      <nav className="site-header__nav">
         {!isAuthenticated() && (
           <>
-            <Link to="/login" style={styles.link}>Login</Link>
-            <Link to="/register" style={styles.link}>Register</Link>
+            <Link to="/login" className="site-header__link">Login</Link>
+            <Link to="/register" className="site-header__link">Register</Link>
           </>
         )}
 
         {isAuthenticated() && (
           <>
-            <Link to="/dashboard" style={styles.link}>Dashboard</Link>
-            <span style={styles.userText}>Hi, {user?.name || 'User'}</span>
-            <button style={styles.logoutBtn} onClick={logout}>Logout</button>
+            <Link to="/dashboard" className="site-header__link">Dashboard</Link>
+            <span className="site-header__user-text">Hi, {user?.name || 'User'}</span>
+            <button className="site-header__logout-btn" onClick={logout}>Logout</button>
           </>
         )}
       </nav>
     </header>
   );
-};
-
-const styles = {
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1rem 2rem',
-    backgroundColor: '#333',
-    color: '#fff',
-  },
-  logo: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-  },
-  nav: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
-  },
-  link: {
-    color: '#fff',
-    textDecoration: 'none',
-  },
-  userText: {
-    color: '#ddd',
-    fontSize: '0.95rem',
-  },
-  logoutBtn: {
-    background: 'transparent',
-    border: '1px solid #aaa',
-    color: '#fff',
-    borderRadius: '4px',
-    padding: '0.4rem 0.7rem',
-    cursor: 'pointer',
-  },
 };
 
 export default Header;

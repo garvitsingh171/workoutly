@@ -133,22 +133,22 @@ const Register = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <h1 style={titleStyle}>Create Your Account</h1>
-        <p style={subtitleStyle}>Join Workoutly and start working out today</p>
+    <section className="page page-auth">
+      <div className="panel panel-auth">
+        <h1 className="panel-title">Create Your Account</h1>
+        <p className="panel-subtitle">Join Workoutly and start working out today</p>
 
         {/* Success Message */}
-        {successMessage && <div style={successStyle}>{successMessage}</div>}
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
         {/* API Error Message */}
-        {apiError && <div style={errorMessageStyle}>{apiError}</div>}
+        {apiError && <div className="alert alert-error">{apiError}</div>}
 
         {/* Registration Form */}
-        <form onSubmit={handleSubmit} style={formStyle}>
+        <form onSubmit={handleSubmit} className="form form-stack">
           {/* Name Field */}
-          <div style={fieldStyle}>
-            <label htmlFor="name" style={labelStyle}>
+          <div className="form-field">
+            <label htmlFor="name" className="form-label">
               Name *
             </label>
             <input
@@ -158,15 +158,15 @@ const Register = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"
-              style={errors.name ? inputErrorStyle : inputStyle}
+              className={errors.name ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
-            {errors.name && <span style={errorTextStyle}>{errors.name}</span>}
+            {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
 
           {/* Email Field */}
-          <div style={fieldStyle}>
-            <label htmlFor="email" style={labelStyle}>
+          <div className="form-field">
+            <label htmlFor="email" className="form-label">
               Email *
             </label>
             <input
@@ -176,15 +176,15 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={errors.email ? inputErrorStyle : inputStyle}
+              className={errors.email ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
-            {errors.email && <span style={errorTextStyle}>{errors.email}</span>}
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           {/* Password Field */}
-          <div style={fieldStyle}>
-            <label htmlFor="password" style={labelStyle}>
+          <div className="form-field">
+            <label htmlFor="password" className="form-label">
               Password *
             </label>
             <input
@@ -194,17 +194,17 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Create a password (min 6 characters)"
-              style={errors.password ? inputErrorStyle : inputStyle}
+              className={errors.password ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
             {errors.password && (
-              <span style={errorTextStyle}>{errors.password}</span>
+              <span className="field-error">{errors.password}</span>
             )}
           </div>
 
           {/* Confirm Password Field */}
-          <div style={fieldStyle}>
-            <label htmlFor="confirmPassword" style={labelStyle}>
+          <div className="form-field">
+            <label htmlFor="confirmPassword" className="form-label">
               Confirm Password *
             </label>
             <input
@@ -214,18 +214,18 @@ const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Re-enter your password"
-              style={errors.confirmPassword ? inputErrorStyle : inputStyle}
+              className={errors.confirmPassword ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
             {errors.confirmPassword && (
-              <span style={errorTextStyle}>{errors.confirmPassword}</span>
+              <span className="field-error">{errors.confirmPassword}</span>
             )}
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            style={isLoading ? buttonDisabledStyle : buttonStyle}
+            className={isLoading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
             disabled={isLoading}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
@@ -233,133 +233,15 @@ const Register = () => {
         </form>
 
         {/* Login Link */}
-        <p style={linkTextStyle}>
+        <p className="auth-link-text">
           Already have an account?{" "}
-          <Link to="/login" style={linkStyle}>
+          <Link to="/login" className="auth-link">
             Login here
           </Link>
         </p>
       </div>
-    </div>
+    </section>
   );
-};
-
-const containerStyle = {
-  minHeight: "80vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "2rem",
-  backgroundColor: "#f8f9fa",
-};
-
-const formContainerStyle = {
-  maxWidth: "450px",
-  width: "100%",
-  padding: "2.5rem",
-  backgroundColor: "white",
-  borderRadius: "10px",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-};
-
-const titleStyle = {
-  textAlign: "center",
-  marginBottom: "0.5rem",
-  color: "#333",
-  fontSize: "2rem",
-};
-
-const subtitleStyle = {
-  textAlign: "center",
-  color: "#666",
-  marginBottom: "2rem",
-  fontSize: "0.95rem",
-};
-
-const formStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.5rem",
-};
-
-const fieldStyle = {
-  display: "flex",
-  flexDirection: "column",
-};
-
-const labelStyle = {
-  marginBottom: "0.5rem",
-  fontWeight: "500",
-  color: "#333",
-  fontSize: "0.9rem",
-};
-
-const inputStyle = {
-  padding: "0.75rem",
-  fontSize: "1rem",
-  border: "1px solid #ddd",
-  borderRadius: "5px",
-  transition: "border-color 0.3s",
-};
-
-const inputErrorStyle = {
-  ...inputStyle,
-  borderColor: "#dc3545",
-};
-
-const errorTextStyle = {
-  color: "#dc3545",
-  fontSize: "0.85rem",
-  marginTop: "0.25rem",
-};
-
-const buttonStyle = {
-  padding: "0.875rem",
-  fontSize: "1rem",
-  fontWeight: "bold",
-  color: "white",
-  backgroundColor: "#007bff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  transition: "background-color 0.3s",
-  marginTop: "0.5rem",
-};
-
-const buttonDisabledStyle = {
-  ...buttonStyle,
-  backgroundColor: "#6c757d",
-  cursor: "not-allowed",
-};
-
-const successStyle = {
-  padding: "1rem",
-  backgroundColor: "#d4edda",
-  color: "#155724",
-  borderRadius: "5px",
-  marginBottom: "1rem",
-  border: "1px solid #c3e6cb",
-};
-
-const errorMessageStyle = {
-  padding: "1rem",
-  backgroundColor: "#f8d7da",
-  color: "#721c24",
-  borderRadius: "5px",
-  marginBottom: "1rem",
-  border: "1px solid #f5c6cb",
-};
-
-const linkTextStyle = {
-  textAlign: "center",
-  marginTop: "1.5rem",
-  color: "#666",
-};
-
-const linkStyle = {
-  color: "#007bff",
-  textDecoration: "none",
-  fontWeight: "500",
 };
 
 export default Register;

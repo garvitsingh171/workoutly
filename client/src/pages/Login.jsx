@@ -16,7 +16,7 @@ const Login = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div className="page-state">
         <p>Loading...</p>
       </div>
     );
@@ -92,16 +92,16 @@ const Login = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <h1 style={titleStyle}>Welcome Back</h1>
-        <p style={subtitleStyle}>Login to continue your fitness journey</p>
+    <section className="page page-auth">
+      <div className="panel panel-auth">
+        <h1 className="panel-title">Welcome Back</h1>
+        <p className="panel-subtitle">Login to continue your fitness journey</p>
 
-        {apiError && <div style={errorMessageStyle}>{apiError}</div>}
+        {apiError && <div className="alert alert-error">{apiError}</div>}
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          <div style={fieldStyle}>
-            <label htmlFor="email" style={labelStyle}>
+        <form onSubmit={handleSubmit} className="form form-stack">
+          <div className="form-field">
+            <label htmlFor="email" className="form-label">
               Email
             </label>
             <input
@@ -111,14 +111,14 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={errors.email ? inputErrorStyle : inputStyle}
+              className={errors.email ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
-            {errors.email && <span style={errorTextStyle}>{errors.email}</span>}
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
-          <div style={fieldStyle}>
-            <label htmlFor="password" style={labelStyle}>
+          <div className="form-field">
+            <label htmlFor="password" className="form-label">
               Password
             </label>
             <input
@@ -128,138 +128,30 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              style={errors.password ? inputErrorStyle : inputStyle}
+              className={errors.password ? 'form-input form-input-error' : 'form-input'}
               disabled={isLoading}
             />
-            {errors.password && <span style={errorTextStyle}>{errors.password}</span>}
+            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
           <button
             type="submit"
-            style={isLoading ? buttonDisabledStyle : buttonStyle}
+            className={isLoading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
             disabled={isLoading}
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        <p style={linkTextStyle}>
+        <p className="auth-link-text">
           New to Workoutly?{' '}
-          <Link to="/register" style={linkStyle}>
+          <Link to="/register" className="auth-link">
             Create an account
           </Link>
         </p>
       </div>
-    </div>
+    </section>
   );
-};
-
-const containerStyle = {
-  minHeight: '80vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '2rem',
-  backgroundColor: '#f8f9fa',
-};
-
-const formContainerStyle = {
-  maxWidth: '420px',
-  width: '100%',
-  padding: '2.5rem',
-  backgroundColor: 'white',
-  borderRadius: '10px',
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-};
-
-const titleStyle = {
-  textAlign: 'center',
-  marginBottom: '0.5rem',
-  color: '#333',
-  fontSize: '2rem',
-};
-
-const subtitleStyle = {
-  textAlign: 'center',
-  color: '#666',
-  marginBottom: '2rem',
-  fontSize: '0.95rem',
-};
-
-const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-};
-
-const fieldStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-};
-
-const labelStyle = {
-  marginBottom: '0.5rem',
-  fontWeight: '500',
-  color: '#333',
-  fontSize: '0.9rem',
-};
-
-const inputStyle = {
-  padding: '0.75rem',
-  fontSize: '1rem',
-  border: '1px solid #ddd',
-  borderRadius: '5px',
-};
-
-const inputErrorStyle = {
-  ...inputStyle,
-  borderColor: '#dc3545',
-};
-
-const errorTextStyle = {
-  color: '#dc3545',
-  fontSize: '0.85rem',
-  marginTop: '0.25rem',
-};
-
-const buttonStyle = {
-  padding: '0.875rem',
-  fontSize: '1rem',
-  fontWeight: 'bold',
-  color: 'white',
-  backgroundColor: '#007bff',
-  border: 'none',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  marginTop: '0.25rem',
-};
-
-const buttonDisabledStyle = {
-  ...buttonStyle,
-  backgroundColor: '#6c757d',
-  cursor: 'not-allowed',
-};
-
-const errorMessageStyle = {
-  padding: '0.9rem',
-  backgroundColor: '#f8d7da',
-  color: '#721c24',
-  borderRadius: '5px',
-  marginBottom: '1rem',
-  border: '1px solid #f5c6cb',
-  fontSize: '0.95rem',
-};
-
-const linkTextStyle = {
-  textAlign: 'center',
-  marginTop: '1.5rem',
-  color: '#666',
-};
-
-const linkStyle = {
-  color: '#007bff',
-  textDecoration: 'none',
-  fontWeight: '500',
 };
 
 export default Login;
