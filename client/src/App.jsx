@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateWorkout from './pages/CreateWorkout';
+import EditWorkout from './pages/EditWorkout';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
@@ -50,6 +51,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateWorkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/workouts/edit/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditWorkout />
                   </ProtectedRoute>
                 }
               />
