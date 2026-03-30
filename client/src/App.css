@@ -398,6 +398,200 @@
   color: var(--text-strong);
 }
 
+.workout-list-wrap {
+  width: min(980px, 100%);
+  margin: 1.2rem auto 1.6rem;
+  text-align: left;
+}
+
+.workout-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.workout-list-title {
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.workout-list-create-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.workout-empty-state {
+  border-radius: 12px;
+  border: 1px solid rgba(13, 30, 56, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1rem;
+}
+
+.workout-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.workout-card {
+  border-radius: 14px;
+  border: 1px solid rgba(13, 30, 56, 0.12);
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(13, 30, 56, 0.09);
+  padding: 1rem;
+}
+
+.workout-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.workout-card-title {
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.workout-badge {
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.8rem;
+  color: #0d3556;
+  background: rgba(18, 176, 145, 0.16);
+  border: 1px solid rgba(18, 176, 145, 0.35);
+  text-transform: capitalize;
+}
+
+.workout-card-meta {
+  margin: 0.2rem 0;
+  color: var(--text-muted);
+}
+
+.workout-exercise-preview {
+  margin: 0.6rem 0;
+  padding-left: 1.15rem;
+  color: var(--text-muted);
+}
+
+.workout-exercise-preview li {
+  margin-bottom: 0.22rem;
+}
+
+.workout-card-notes {
+  margin: 0.5rem 0;
+  color: #3b4d6a;
+  background: #f6faff;
+  border-radius: 9px;
+  border: 1px solid #d6e5f4;
+  padding: 0.55rem;
+}
+
+.workout-card-date {
+  margin: 0.45rem 0 0;
+  color: #6b7d99;
+  font-size: 0.88rem;
+}
+
+.pagination-controls {
+  margin-top: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(13, 30, 56, 0.1);
+  background: #ffffff;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.pagination-button {
+  width: auto;
+}
+
+.pagination-info {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.workout-form {
+  text-align: left;
+  margin: 0 auto;
+  width: min(920px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(13, 30, 56, 0.1);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 26px rgba(13, 30, 56, 0.12);
+  padding: 1.3rem;
+}
+
+.workout-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.workout-exercises {
+  border: 1px solid rgba(13, 30, 56, 0.12);
+  border-radius: 12px;
+  background: #f8fcff;
+  padding: 0.95rem;
+}
+
+.workout-exercises__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.workout-exercises__title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 1rem;
+}
+
+.workout-exercises__add {
+  width: auto;
+  padding: 0.62rem 0.9rem;
+}
+
+.workout-exercise-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.7rem;
+  align-items: end;
+  border-radius: 10px;
+  border: 1px solid rgba(13, 30, 56, 0.08);
+  background: #ffffff;
+  padding: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.workout-exercise-row:last-child {
+  margin-bottom: 0;
+}
+
+.workout-exercise-row__remove {
+  width: auto;
+  padding: 0.62rem 0.85rem;
+  margin-bottom: 0.12rem;
+}
+
+.workout-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
 .not-found-wrap {
   width: min(620px, 100%);
   margin: 0 auto;
@@ -495,5 +689,36 @@
 
   .dashboard-card {
     padding: 0.92rem;
+  }
+
+  .workout-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workout-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-exercises__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workout-exercise-row {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-form-actions {
+    flex-direction: column-reverse;
   }
 }
