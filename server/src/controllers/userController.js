@@ -62,6 +62,10 @@ const getUsers = async (req, res) => {
 // @access  Public
 const getUserById = async (req, res) => {
   try {
+    if (req.user && req.params.id !== String(req.user._id)) {
+      return res.status(403).json({ message: 'You can only view your own profile' });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (user) {
@@ -83,6 +87,10 @@ const getUserById = async (req, res) => {
 // @access  Public
 const updateUser = async (req, res) => {
   try {
+    if (req.user && req.params.id !== String(req.user._id)) {
+      return res.status(403).json({ message: 'You can only update your own profile' });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (user) {
@@ -117,6 +125,10 @@ const updateUser = async (req, res) => {
 // @access  Public
 const deleteUser = async (req, res) => {
   try {
+    if (req.user && req.params.id !== String(req.user._id)) {
+      return res.status(403).json({ message: 'You can only delete your own profile' });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (user) {

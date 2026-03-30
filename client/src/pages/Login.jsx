@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import api from '../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -61,18 +62,8 @@ const Login = () => {
         password: formData.password,
       };
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginPayload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setApiError(data.message || 'Login failed. Please try again.');
-        return;
-      }
+      const response = await api.post('/api/auth/login', loginPayload);
+      const data = response.data;
 
       const loginResult = login(data.user, data.token);
 
@@ -83,8 +74,8 @@ const Login = () => {
 
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
-    } catch {
-      setApiError('Unable to connect to server. Please try again.');
+    } catch (error) {
+      setApiError(error.response?.data?.message || 'Unable to connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }

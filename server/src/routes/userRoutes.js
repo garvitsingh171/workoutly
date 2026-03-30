@@ -7,10 +7,11 @@ const {
   updateUser,
   deleteUser
 } = require('../controllers/userController');
+const { protect } = require('../middleware/auth');
 
 // /api/users routes
-router.route('/').get(getUsers);
+router.route('/').get(protect, getUsers);
 router.post('/register', registerUser);
-router.route('/:id').get(getUserById).put(updateUser).delete(deleteUser);
+router.route('/:id').get(protect, getUserById).put(protect, updateUser).delete(protect, deleteUser);
 
 module.exports = router;
