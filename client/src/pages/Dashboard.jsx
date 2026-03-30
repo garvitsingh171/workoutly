@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [workouts, setWorkouts] = useState([]);
   const [workoutsLoading, setWorkoutsLoading] = useState(true);
   const [workoutsError, setWorkoutsError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -77,6 +78,30 @@ const Dashboard = () => {
     setCurrentPage(page);
   };
 
+  const handleDeleteWorkout = async (workoutId) => {
+    const confirmed = window.confirm('Are you sure you want to delete this workout? This action cannot be undone.');
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionError('');
+
+    try {
+      const response = await api.delete(`/api/workouts/${workoutId}`);
+
+      if (response.data.success) {
+        setWorkouts((prevWorkouts) => prevWorkouts.filter((workout) => workout._id !== workoutId));
+        setPagination((prev) => ({
+          ...prev,
+          total: Math.max(0, prev.total - 1),
+        }));
+      }
+    } catch (error) {
+      setActionError(error.response?.data?.message || 'Failed to delete workout.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-state">
@@ -119,6 +144,7 @@ const Dashboard = () => {
           </div>
 
           {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
+          {actionError && <div className="alert alert-error">{actionError}</div>}
 
           {workoutsLoading ? (
             <p className="dashboard-subtext">Loading workouts...</p>
@@ -155,6 +181,19 @@ const Dashboard = () => {
                     </ul>
 
                     {workout.notes ? <p className="workout-card-notes">{workout.notes}</p> : null}
+
+                    <div className="workout-card-actions">
+                      <Link to={`/workouts/edit/${workout._id}`} className="btn btn-dark workout-card-action-btn">
+                        Edit
+                      </Link>
+                      <button
+                        type="button"
+                        className="btn btn-danger workout-card-action-btn"
+                        onClick={() => handleDeleteWorkout(workout._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
 
                     <p className="workout-card-date">
                       Created on {new Date(workout.createdAt).toLocaleDateString()}
