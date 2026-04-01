@@ -1,4 +1,5 @@
 const Workout = require('../models/Workout');
+const AppError = require('../utils/AppError');
 
 const parsePositiveInteger = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
@@ -58,7 +59,7 @@ const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty,
 // @desc    Create a new workout
 // @route   POST /api/workouts
 // @access  Private
-const createWorkout = async (req, res) => {
+const createWorkout = async (req, res, next) => {
   try {
     const { name, exercises, duration, difficulty, notes } = req.body;
 
@@ -71,10 +72,7 @@ const createWorkout = async (req, res) => {
     });
 
     if (payloadResult.error) {
-      return res.status(400).json({
-        success: false,
-        message: payloadResult.error,
-      });
+      return next(new AppError(payloadResult.error, 400));
     }
 
     const workout = await Workout.create({
@@ -88,18 +86,14 @@ const createWorkout = async (req, res) => {
       data: workout,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error creating workout',
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // @desc    Get workouts with pagination
 // @route   GET /api/workouts?page=1&limit=10
 // @access  Private
-const getWorkouts = async (req, res) => {
+const getWorkouts = async (req, res, next) => {
   try {
     const page = parsePositiveInteger(req.query.page, 1);
     const requestedLimit = parsePositiveInteger(req.query.limit, 10);
@@ -132,33 +126,23 @@ const getWorkouts = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching workouts',
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // @desc    Get single workout by id
 // @route   GET /api/workouts/:id
 // @access  Private
-const getWorkoutById = async (req, res) => {
+const getWorkoutById = async (req, res, next) => {
   try {
     const workout = await Workout.findById(req.params.id).populate('author', 'name email');
 
     if (!workout) {
-      return res.status(404).json({
-        success: false,
-        message: 'Workout not found',
-      });
+      return next(new AppError('Workout not found', 404));
     }
 
     if (workout.author._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to view this workout',
-      });
+      return next(new AppError('Not authorized to view this workout', 403));
     }
 
     return res.status(200).json({
@@ -166,33 +150,23 @@ const getWorkoutById = async (req, res) => {
       data: workout,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching workout',
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // @desc    Update workout
 // @route   PUT /api/workouts/:id
 // @access  Private
-const updateWorkout = async (req, res) => {
+const updateWorkout = async (req, res, next) => {
   try {
     const workout = await Workout.findById(req.params.id);
 
     if (!workout) {
-      return res.status(404).json({
-        success: false,
-        message: 'Workout not found',
-      });
+      return next(new AppError('Workout not found', 404));
     }
 
     if (workout.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this workout',
-      });
+      return next(new AppError('Not authorized to update this workout', 403));
     }
 
     const { name, exercises, duration, difficulty, notes } = req.body;
@@ -205,10 +179,7 @@ const updateWorkout = async (req, res) => {
     });
 
     if (payloadResult.error) {
-      return res.status(400).json({
-        success: false,
-        message: payloadResult.error,
-      });
+      return next(new AppError(payloadResult.error, 400));
     }
 
     workout.name = payloadResult.data.name;
@@ -225,33 +196,23 @@ const updateWorkout = async (req, res) => {
       data: updatedWorkout,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error updating workout',
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // @desc    Delete workout
 // @route   DELETE /api/workouts/:id
 // @access  Private
-const deleteWorkout = async (req, res) => {
+const deleteWorkout = async (req, res, next) => {
   try {
     const workout = await Workout.findById(req.params.id);
 
     if (!workout) {
-      return res.status(404).json({
-        success: false,
-        message: 'Workout not found',
-      });
+      return next(new AppError('Workout not found', 404));
     }
 
     if (workout.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this workout',
-      });
+      return next(new AppError('Not authorized to delete this workout', 403));
     }
 
     await workout.deleteOne();
@@ -262,11 +223,7 @@ const deleteWorkout = async (req, res) => {
       data: { id: req.params.id },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error deleting workout',
-      error: error.message,
-    });
+    return next(error);
   }
 };
 

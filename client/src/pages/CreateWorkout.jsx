@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { toast } from 'react-toastify';
+import api, { getErrorMessage } from '../services/api';
 
 const defaultExercise = {
   name: '',
@@ -77,10 +78,13 @@ const CreateWorkout = () => {
     try {
       const response = await api.post('/api/workouts', payload);
       if (response.data.success) {
+        toast.success('Workout created successfully!');
         navigate('/dashboard');
       }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Failed to create workout. Please try again.');
+      const message = getErrorMessage(requestError, 'Failed to create workout. Please try again.');
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

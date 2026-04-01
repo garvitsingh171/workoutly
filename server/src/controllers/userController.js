@@ -1,22 +1,23 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 // @desc    Register a new user
 // @route   POST /api/users/register
 // @access  Public
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please add all fields' });
+      return next(new AppError('Please add all fields', 400));
     }
 
     // Check if user exists
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return next(new AppError('User already exists', 400));
     }
 
     // Hash password
@@ -31,64 +32,70 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
-      res.status(201).json({
+      return res.status(201).json({
+        success: true,
         _id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
       });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
     }
+
+    return next(new AppError('Invalid user data', 400));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Public
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     // Exclude passwords
     const users = await User.find({});
-    res.status(200).json(users);
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
 // @desc    Get a user by ID
 // @route   GET /api/users/:id
 // @access  Public
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
-      return res.status(403).json({ message: 'You can only view your own profile' });
+      return next(new AppError('You can only view your own profile', 403));
     }
 
     const user = await User.findById(req.params.id);
 
     if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
+      return res.status(200).json({
+        success: true,
+        data: user,
+      });
     }
+
+    return next(new AppError('User not found', 404));
   } catch (error) {
-    // Handle invalid ID format
     if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
+      return next(new AppError('User not found', 404));
     }
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
 // @desc    Update a user
 // @route   PUT /api/users/:id
 // @access  Public
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
-      return res.status(403).json({ message: 'You can only update your own profile' });
+      return next(new AppError('You can only update your own profile', 403));
     }
 
     const user = await User.findById(req.params.id);
@@ -104,44 +111,48 @@ const updateUser = async (req, res) => {
 
       const updatedUser = await user.save();
 
-      res.status(200).json({
+      return res.status(200).json({
+        success: true,
         _id: updatedUser._id,
         name: updatedUser.name,
-        email: updatedUser.email
+        email: updatedUser.email,
       });
-    } else {
-      res.status(404).json({ message: 'User not found' });
     }
+
+    return next(new AppError('User not found', 404));
   } catch (error) {
     if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
+      return next(new AppError('User not found', 404));
     }
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
 // @desc    Delete a user
 // @route   DELETE /api/users/:id
 // @access  Public
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
-      return res.status(403).json({ message: 'You can only delete your own profile' });
+      return next(new AppError('You can only delete your own profile', 403));
     }
 
     const user = await User.findById(req.params.id);
 
     if (user) {
       await User.deleteOne({ _id: user._id });
-      res.status(200).json({ message: 'User removed' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+      return res.status(200).json({
+        success: true,
+        message: 'User removed',
+      });
     }
+
+    return next(new AppError('User not found', 404));
   } catch (error) {
     if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
+      return next(new AppError('User not found', 404));
     }
-    res.status(500).json({ message: error.message });
+    return next(error);
   }
 };
 
@@ -150,5 +161,5 @@ module.exports = {
   getUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
 };

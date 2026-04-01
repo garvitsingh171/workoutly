@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../services/api';
+import { toast } from 'react-toastify';
+import api, { getErrorMessage } from '../services/api';
 
 const defaultExercise = {
   name: '',
@@ -47,7 +48,9 @@ const EditWorkout = () => {
               : [defaultExercise],
         });
       } catch (requestError) {
-        setError(requestError.response?.data?.message || 'Failed to load workout details.');
+        const message = getErrorMessage(requestError, 'Failed to load workout details.');
+        setError(message);
+        toast.error(message);
       } finally {
         setIsLoading(false);
       }
@@ -113,10 +116,14 @@ const EditWorkout = () => {
     try {
       const response = await api.put(`/api/workouts/${id}`, payload);
       if (response.data.success) {
+        toast.success('Workout updated successfully!');
         navigate('/dashboard');
       }
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Failed to update workout. Please try again.');
+      const message = getErrorMessage(requestError, 'Failed to update workout. Please try again.');
+      setError(message);
+      toast.error(message);
+    } finally {
       setIsSubmitting(false);
     }
   };

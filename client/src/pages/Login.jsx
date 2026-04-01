@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import api from '../services/api';
+import { toast } from 'react-toastify';
+import api, { getErrorMessage } from '../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -68,14 +69,18 @@ const Login = () => {
       const loginResult = login(data.user, data.token);
 
       if (!loginResult.success) {
-        setApiError(loginResult.message || 'Unable to login.');
+        const message = loginResult.message || 'Unable to login.';
+        setApiError(message);
+        toast.error(message);
         return;
       }
 
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     } catch (error) {
-      setApiError(error.response?.data?.message || 'Unable to connect to server. Please try again.');
+      const message = getErrorMessage(error, 'Unable to connect to server. Please try again.');
+      setApiError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
