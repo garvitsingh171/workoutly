@@ -36,7 +36,7 @@ app.use('/api/workouts', require('./src/routes/workoutRoutes'));
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
   res.send('Workoutly API is running...');
