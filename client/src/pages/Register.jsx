@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { toast } from 'react-toastify';
+import api, { getErrorMessage } from "../services/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -95,6 +96,7 @@ const Register = () => {
       setSuccessMessage(
         "Account created successfully! Redirecting to login...",
       );
+      toast.success('Account created successfully!');
 
       // Clear form
       setFormData({
@@ -109,12 +111,12 @@ const Register = () => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      // Network or other error
-      console.error("Registration error:", error);
-      setApiError(
-        error.response?.data?.message ||
-          "Unable to connect to server. Please check your connection and try again.",
+      const message = getErrorMessage(
+        error,
+        "Unable to connect to server. Please check your connection and try again.",
       );
+      setApiError(message);
+      toast.error(message);
     } finally {
       // Stop loading regardless of success/failure
       setIsLoading(false);

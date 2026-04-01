@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { toast } from 'react-toastify';
+import api, { getErrorMessage } from '../services/api';
 
 const Dashboard = () => {
   const { user, loading, isAuthenticated, logout } = useAuth();
@@ -31,9 +32,11 @@ const Dashboard = () => {
 
       try {
         const response = await api.get(`/api/users/${user._id}`);
-        setProfile(response.data);
+        setProfile(response.data.data);
       } catch (error) {
-        setProfileError(error.response?.data?.message || 'Failed to load profile data.');
+        const message = getErrorMessage(error, 'Failed to load profile data.');
+        setProfileError(message);
+        toast.error(message);
       } finally {
         setProfileLoading(false);
       }
@@ -61,7 +64,9 @@ const Dashboard = () => {
           }
         );
       } catch (error) {
-        setWorkoutsError(error.response?.data?.message || 'Failed to load workouts.');
+        const message = getErrorMessage(error, 'Failed to load workouts.');
+        setWorkoutsError(message);
+        toast.error(message);
       } finally {
         setWorkoutsLoading(false);
       }
@@ -96,9 +101,12 @@ const Dashboard = () => {
           ...prev,
           total: Math.max(0, prev.total - 1),
         }));
+        toast.success('Workout deleted successfully!');
       }
     } catch (error) {
-      setActionError(error.response?.data?.message || 'Failed to delete workout.');
+      const message = getErrorMessage(error, 'Failed to delete workout.');
+      setActionError(message);
+      toast.error(message);
     }
   };
 

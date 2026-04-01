@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 const protect = async (req, res, next) => {
   try {
@@ -10,29 +11,19 @@ const protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized, no token',
-      });
+      return next(new AppError('Not authorized, no token', 401));
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.userId).select('-password');
 
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found',
-      });
+      return next(new AppError('User not found', 401));
     }
 
     return next();
   } catch (error) {
-    console.error('Auth middleware error:', error.message);
-    return res.status(401).json({
-      success: false,
-      message: 'Not authorized, token failed',
-    });
+    return next(new AppError('Not authorized, token failed', 401));
   }
 };
 

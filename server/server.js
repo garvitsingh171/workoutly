@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
+const { notFound, errorHandler } = require('./src/middleware/errorHandler');
 
 // Load env vars
 dotenv.config();
@@ -30,6 +31,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/users', require('./src/routes/userRoutes'));
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/workouts', require('./src/routes/workoutRoutes'));
+
+// Global error handling
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
