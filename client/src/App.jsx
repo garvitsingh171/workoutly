@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
 import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -20,6 +21,7 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="app-shell">
+          <Toaster position="top-right" />
           <ToastContainer
             position="top-right"
             autoClose={3000}
