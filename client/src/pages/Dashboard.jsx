@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import hotToast from 'react-hot-toast';
 import api, { getErrorMessage } from '../services/api';
 import socket from '../services/socket';
 
@@ -36,13 +37,18 @@ const Dashboard = () => {
     })
 
     socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error.message)
+      console.error('Socket auth error:', error.message)
+    })
+
+    socket.on('newWorkout', (data) => {
+      hotToast.success(data.message);
     })
 
     return () => {
       socket.off('connect');
       socket.off('disconnect');
       socket.off('connect_error');
+      socket.off('newWorkout');
       socket.disconnect();
     };
   }, []);

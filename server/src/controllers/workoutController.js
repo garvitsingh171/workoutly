@@ -80,6 +80,20 @@ const createWorkout = async (req, res, next) => {
       author: req.user._id,
     });
 
+    if (req.io) {
+      req.io.emit('newWorkout', {
+        message: `New workout created by ${req.user.name}!`,
+        workout: {
+          _id: workout._id,
+          name: workout.name,
+          duration: workout.duration,
+          difficulty: workout.difficulty,
+          createdBy: req.user.name,
+          createdAt: workout.createdAt,
+        },
+      });
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Workout created successfully',
