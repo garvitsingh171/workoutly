@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from '../services/api';
+import socket from '../services/socket';
 
 const Dashboard = () => {
   const { user, loading, isAuthenticated, logout } = useAuth();
@@ -23,6 +24,29 @@ const Dashboard = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    socket.connect();
+
+    socket.on('connect', () => {
+      console.log('🔌 Socket connected:', socket.id)
+    })
+
+    socket.on('disconnect', (reason) => {
+      console.log('❌ Socket disconnected:', reason)
+    })
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error.message)
+    })
+
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('connect_error');
+      socket.disconnect();
+    };
+  }, []);
+  
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?._id) {
