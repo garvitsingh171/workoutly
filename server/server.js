@@ -83,6 +83,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', require('./src/routes/userRoutes'));
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/workouts', require('./src/routes/workoutRoutes')(io));
+app.use('/api/upload', require('./src/routes/upload'));
 
 // Global error handling
 app.use(notFound);
