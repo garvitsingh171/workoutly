@@ -198,6 +198,20 @@ const Dashboard = () => {
               <div className="workout-card-grid">
                 {workouts.map((workout) => (
                   <article className="workout-card" key={workout._id}>
+                    {workout.coverImage && (
+                      <img
+                        src={workout.coverImage}
+                        alt={`Cover image for ${workout.name}`}
+                        style={{
+                          width: '100%',
+                          maxHeight: '180px',
+                          objectFit: 'cover',
+                          borderRadius: '0.9rem',
+                          marginBottom: '0.75rem',
+                        }}
+                      />
+                    )}
+
                     <div className="workout-card-top">
                       <h4 className="workout-card-title">{workout.name}</h4>
                       <span className="workout-badge">{workout.difficulty}</span>
