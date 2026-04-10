@@ -56,6 +56,11 @@ const workoutSchema = new mongoose.Schema(
       maxlength: [500, 'Notes cannot exceed 500 characters'],
       default: '',
     },
+    coverImage: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

@@ -22,6 +22,8 @@ const CreateWorkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
@@ -65,32 +67,53 @@ const CreateWorkout = () => {
   };
 
   const handleImageUpload = async (uploadFormData) => {
-    const response = await api.post("/api/upload", uploadFormData, {
-      headers: {
-        "Content-Type": undefined,
-      },
-    });
+    setUploadError("");
+    setIsUploadingImage(true);
 
-    if (!response.data?.success) {
-      throw new Error("Upload failed. Please try again.");
+    try {
+      const response = await api.post("/api/upload", uploadFormData);
+
+      if (!response.data?.success || !response.data?.url) {
+        throw new Error("Upload failed. Please try again.");
+      }
+
+      // TODO: If a user uploads another image before saving the workout,
+      // the previously uploaded Cloudinary asset becomes orphaned.
+      // A future improvement can delete the previous publicId before replacing it.
+      setUploadedImage({
+        url: response.data.url,
+        publicId: response.data.publicId,
+        fileName: uploadFormData.get("image")?.name || "Uploaded image",
+      });
+
+      toast.success("Cover image uploaded successfully.");
+    } catch (uploadRequestError) {
+      const message = getErrorMessage(
+        uploadRequestError,
+        "Image upload failed. Please try again.",
+      );
+      setUploadError(message);
+      toast.error(message);
+      throw uploadRequestError;
+    } finally {
+      setIsUploadingImage(false);
     }
-
-    setUploadedImage({
-      url: response.data.url,
-      publicId: response.data.publicId,
-      fileName: uploadFormData.get("image")?.name || "Uploaded image",
-    });
-
-    toast.success("Cover image uploaded successfully.");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
+    if (isUploadingImage) {
+      toast.error("Please wait for the image upload to complete.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload = {
       ...formData,
+      coverImage: uploadedImage?.url || null,
       duration: Number.parseInt(formData.duration, 10),
       exercises: formData.exercises.map((exercise) => ({
         name: exercise.name.trim(),
@@ -103,6 +126,15 @@ const CreateWorkout = () => {
       const response = await api.post("/api/workouts", payload);
       if (response.data.success) {
         toast.success("Workout created successfully!");
+        setFormData({
+          name: "",
+          duration: 45,
+          difficulty: "beginner",
+          notes: "",
+          exercises: [defaultExercise],
+        });
+        setUploadedImage(null);
+        setUploadError("");
         navigate("/dashboard");
       }
     } catch (requestError) {
@@ -131,6 +163,12 @@ const CreateWorkout = () => {
             before you publish your routine.
           </p>
           <ImageUpload onUpload={handleImageUpload} />
+
+          {isUploadingImage && (
+            <p className="dashboard-subtext">Uploading image, please wait...</p>
+          )}
+
+          {uploadError && <div className="alert alert-error">{uploadError}</div>}
 
           {uploadedImage && (
             <div className="upload-result-card">
@@ -330,9 +368,13 @@ const CreateWorkout = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingImage}
             >
-              {isSubmitting ? "Creating..." : "Create Workout"}
+              {isSubmitting
+                ? "Creating..."
+                : isUploadingImage
+                  ? "Uploading image..."
+                  : "Create Workout"}
             </button>
           </div>
         </form>

@@ -9,7 +9,7 @@ const parsePositiveInteger = (value, fallback) => {
   return parsed;
 };
 
-const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty, notes }) => {
+const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty, notes, coverImage }) => {
   if (!name || !Array.isArray(exercises) || exercises.length === 0 || !duration) {
     return {
       error: 'Please provide name, duration and at least one exercise',
@@ -45,6 +45,9 @@ const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty,
     };
   }
 
+  const normalizedCoverImage =
+    typeof coverImage === 'string' && coverImage.trim().length > 0 ? coverImage.trim() : null;
+
   return {
     data: {
       name: String(name).trim(),
@@ -52,6 +55,7 @@ const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty,
       duration: parsedDuration,
       difficulty,
       notes,
+      coverImage: normalizedCoverImage,
     },
   };
 };
@@ -61,7 +65,7 @@ const validateAndBuildWorkoutPayload = ({ name, exercises, duration, difficulty,
 // @access  Private
 const createWorkout = async (req, res, next) => {
   try {
-    const { name, exercises, duration, difficulty, notes } = req.body;
+    const { name, exercises, duration, difficulty, notes, coverImage } = req.body;
 
     const payloadResult = validateAndBuildWorkoutPayload({
       name,
@@ -69,6 +73,7 @@ const createWorkout = async (req, res, next) => {
       duration,
       difficulty,
       notes,
+      coverImage,
     });
 
     if (payloadResult.error) {
@@ -183,13 +188,14 @@ const updateWorkout = async (req, res, next) => {
       return next(new AppError('Not authorized to update this workout', 403));
     }
 
-    const { name, exercises, duration, difficulty, notes } = req.body;
+    const { name, exercises, duration, difficulty, notes, coverImage } = req.body;
     const payloadResult = validateAndBuildWorkoutPayload({
       name,
       exercises,
       duration,
       difficulty,
       notes,
+      coverImage,
     });
 
     if (payloadResult.error) {
@@ -201,6 +207,7 @@ const updateWorkout = async (req, res, next) => {
     workout.duration = payloadResult.data.duration;
     workout.difficulty = payloadResult.data.difficulty;
     workout.notes = payloadResult.data.notes;
+    workout.coverImage = payloadResult.data.coverImage;
 
     const updatedWorkout = await workout.save();
 
