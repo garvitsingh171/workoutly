@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import api, { getErrorMessage } from '../services/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import api, { getErrorMessage } from "../services/api";
+import ImageUpload from "../components/ImageUpload";
 
 const defaultExercise = {
-  name: '',
+  name: "",
   sets: 3,
   reps: 10,
 };
@@ -12,14 +13,15 @@ const defaultExercise = {
 const CreateWorkout = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     duration: 45,
-    difficulty: 'beginner',
-    notes: '',
+    difficulty: "beginner",
+    notes: "",
     exercises: [defaultExercise],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [uploadedImage, setUploadedImage] = useState(null);
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
@@ -55,14 +57,36 @@ const CreateWorkout = () => {
 
       return {
         ...prev,
-        exercises: prev.exercises.filter((_, currentIndex) => currentIndex !== index),
+        exercises: prev.exercises.filter(
+          (_, currentIndex) => currentIndex !== index,
+        ),
       };
     });
   };
 
+  const handleImageUpload = async (uploadFormData) => {
+    const response = await api.post("/api/upload", uploadFormData, {
+      headers: {
+        "Content-Type": undefined,
+      },
+    });
+
+    if (!response.data?.success) {
+      throw new Error("Upload failed. Please try again.");
+    }
+
+    setUploadedImage({
+      url: response.data.url,
+      publicId: response.data.publicId,
+      fileName: uploadFormData.get("image")?.name || "Uploaded image",
+    });
+
+    toast.success("Cover image uploaded successfully.");
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
 
     const payload = {
@@ -76,13 +100,16 @@ const CreateWorkout = () => {
     };
 
     try {
-      const response = await api.post('/api/workouts', payload);
+      const response = await api.post("/api/workouts", payload);
       if (response.data.success) {
-        toast.success('Workout created successfully!');
-        navigate('/dashboard');
+        toast.success("Workout created successfully!");
+        navigate("/dashboard");
       }
     } catch (requestError) {
-      const message = getErrorMessage(requestError, 'Failed to create workout. Please try again.');
+      const message = getErrorMessage(
+        requestError,
+        "Failed to create workout. Please try again.",
+      );
       setError(message);
       toast.error(message);
     } finally {
@@ -94,7 +121,41 @@ const CreateWorkout = () => {
     <section className="page page-dashboard">
       <div className="dashboard-wrap">
         <h2 className="dashboard-title">Create Workout</h2>
-        <p className="dashboard-subtext">Build a routine that you can track over time.</p>
+        <p className="dashboard-subtext">
+          Build a routine that you can track over time.
+        </p>
+        <div className="workout-upload-panel">
+          <h3 className="workout-exercises__title">Workout Cover Image</h3>
+          <p className="dashboard-subtext">
+            Add a visual cover for this workout. Your image is uploaded securely
+            before you publish your routine.
+          </p>
+          <ImageUpload onUpload={handleImageUpload} />
+
+          {uploadedImage && (
+            <div className="upload-result-card">
+              <img
+                src={uploadedImage.url}
+                alt={uploadedImage.fileName}
+                className="upload-result-card__image"
+              />
+              <div className="upload-result-card__content">
+                <p className="upload-result-card__title">Upload complete</p>
+                <p className="upload-result-card__meta">
+                  {uploadedImage.fileName}
+                </p>
+                <a
+                  className="auth-link"
+                  href={uploadedImage.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open hosted image
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -170,15 +231,25 @@ const CreateWorkout = () => {
           <div className="workout-exercises">
             <div className="workout-exercises__header">
               <h3 className="workout-exercises__title">Exercises</h3>
-              <button type="button" className="btn btn-dark workout-exercises__add" onClick={handleAddExercise}>
+              <button
+                type="button"
+                className="btn btn-dark workout-exercises__add"
+                onClick={handleAddExercise}
+              >
                 + Add Exercise
               </button>
             </div>
 
             {formData.exercises.map((exercise, index) => (
-              <div className="workout-exercise-row" key={`exercise-${index + 1}`}>
+              <div
+                className="workout-exercise-row"
+                key={`exercise-${index + 1}`}
+              >
                 <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-name-${index}`}>
+                  <label
+                    className="form-label"
+                    htmlFor={`exercise-name-${index}`}
+                  >
                     Exercise Name
                   </label>
                   <input
@@ -186,14 +257,19 @@ const CreateWorkout = () => {
                     className="form-input"
                     type="text"
                     value={exercise.name}
-                    onChange={(event) => handleExerciseChange(index, 'name', event.target.value)}
+                    onChange={(event) =>
+                      handleExerciseChange(index, "name", event.target.value)
+                    }
                     placeholder="Squat, Push Up, Plank..."
                     required
                   />
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-sets-${index}`}>
+                  <label
+                    className="form-label"
+                    htmlFor={`exercise-sets-${index}`}
+                  >
                     Sets
                   </label>
                   <input
@@ -203,13 +279,18 @@ const CreateWorkout = () => {
                     min="1"
                     max="20"
                     value={exercise.sets}
-                    onChange={(event) => handleExerciseChange(index, 'sets', event.target.value)}
+                    onChange={(event) =>
+                      handleExerciseChange(index, "sets", event.target.value)
+                    }
                     required
                   />
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-reps-${index}`}>
+                  <label
+                    className="form-label"
+                    htmlFor={`exercise-reps-${index}`}
+                  >
                     Reps
                   </label>
                   <input
@@ -219,7 +300,9 @@ const CreateWorkout = () => {
                     min="1"
                     max="100"
                     value={exercise.reps}
-                    onChange={(event) => handleExerciseChange(index, 'reps', event.target.value)}
+                    onChange={(event) =>
+                      handleExerciseChange(index, "reps", event.target.value)
+                    }
                     required
                   />
                 </div>
@@ -237,11 +320,19 @@ const CreateWorkout = () => {
           </div>
 
           <div className="workout-form-actions">
-            <button type="button" className="btn btn-dark" onClick={() => navigate('/dashboard')}>
+            <button
+              type="button"
+              className="btn btn-dark"
+              onClick={() => navigate("/dashboard")}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Workout'}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Workout"}
             </button>
           </div>
         </form>
