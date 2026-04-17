@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build: ./server
+    ports:
+      - '5000:5000'
+    environment:
+      MONGO_URI: mongodb://mongo:27017/workoutly
+      PORT: 5000
+      CLIENT_URL: http://localhost:3000
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    depends_on:
+      - mongo
+
+  client:
+    build: ./client
+    ports:
+      - '3000:80'
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
