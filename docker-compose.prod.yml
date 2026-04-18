@@ -7,19 +7,19 @@ services:
       - mongo-data:/data/db
 
   server:
-    build: ./server
+    image: ${DOCKERHUB_USERNAME}/creator-platform-server:${SERVER_IMAGE_TAG:-latest}
     ports:
       - '5000:5000'
     env_file:
       - ./server/.env
     environment:
-      # Keep local .env usable outside Docker while forcing Docker network hostname in Compose.
+      # Force Docker network hostname for Mongo inside Compose network.
       MONGO_URI: mongodb://mongo:27017/workoutly
     depends_on:
       - mongo
 
   client:
-    build: ./client
+    image: ${DOCKERHUB_USERNAME}/creator-platform-client:${CLIENT_IMAGE_TAG:-latest}
     ports:
       - '3000:80'
     depends_on:
