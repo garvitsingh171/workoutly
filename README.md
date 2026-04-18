@@ -137,3 +137,50 @@ Do not include:
 - node_modules
 - build artifacts
 - files containing secrets
+
+## Docker Hub Workflow (Module 4.15)
+
+Use these steps after building your images locally.
+
+1. Login
+
+docker login
+
+2. Tag images with your Docker Hub username
+
+docker tag creator-platform-client:latest your-dockerhub-username/creator-platform-client:latest
+docker tag creator-platform-server:latest your-dockerhub-username/creator-platform-server:latest
+
+3. Push images
+
+docker push your-dockerhub-username/creator-platform-client:latest
+docker push your-dockerhub-username/creator-platform-server:latest
+
+4. Verify pull
+
+docker rmi your-dockerhub-username/creator-platform-client:latest
+docker rmi your-dockerhub-username/creator-platform-server:latest
+docker pull your-dockerhub-username/creator-platform-client:latest
+docker pull your-dockerhub-username/creator-platform-server:latest
+
+Optional version tag:
+
+docker tag your-dockerhub-username/creator-platform-client:latest your-dockerhub-username/creator-platform-client:v1.0.0
+docker push your-dockerhub-username/creator-platform-client:v1.0.0
+
+## Production Compose (Pull from Docker Hub)
+
+This repo now includes docker-compose.prod.yml that uses Docker Hub images instead of local build contexts.
+
+PowerShell example:
+
+$env:DOCKERHUB_USERNAME="your-dockerhub-username"
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+
+Optional image tags:
+
+$env:CLIENT_IMAGE_TAG="latest"
+$env:SERVER_IMAGE_TAG="latest"
+
+This split keeps local development fast with docker-compose.yml while making deployment reproducible with prebuilt images in docker-compose.prod.yml.
