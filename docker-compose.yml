@@ -12,15 +12,11 @@ services:
     build: ./server
     ports:
       - '5000:5000'
+    env_file:
+      - ./server/.env
     environment:
+      # Keep local .env usable outside Docker while forcing Docker network hostname in Compose.
       MONGO_URI: mongodb://mongo:27017/workoutly
-      PORT: 5000
-      CLIENT_URL: http://localhost:3000
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRE: ${JWT_EXPIRE}
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     depends_on:
       - mongo
 
