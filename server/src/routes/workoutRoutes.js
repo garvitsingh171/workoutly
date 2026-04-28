@@ -8,18 +8,18 @@ const {
 } = require('../controllers/workoutController');
 const { protect } = require('../middleware/auth');
 
-module.exports = function (io) {
-	const router = express.Router();
+const router = express.Router();
 
-	router
-		.route('/')
-		.post(protect, (req, res, next) => {
-			req.io = io;
-			return createWorkout(req, res, next);
-		})
-		.get(protect, getWorkouts);
+router.use((req, res, next) => {
+	req.io = req.app?.locals?.io || req.io || { emit: () => {} };
+	next();
+});
 
-	router.route('/:id').get(protect, getWorkoutById).put(protect, updateWorkout).delete(protect, deleteWorkout);
+router
+	.route('/')
+	.post(protect, createWorkout)
+	.get(protect, getWorkouts);
 
-	return router;
-};
+router.route('/:id').get(protect, getWorkoutById).put(protect, updateWorkout).delete(protect, deleteWorkout);
+
+module.exports = router;
