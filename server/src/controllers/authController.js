@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { registerUser } = require('./userController');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
 
@@ -59,5 +60,6 @@ const loginUser = async (req, res, next) => {
 };
 
 module.exports = {
+  registerUser,
   loginUser,
 };

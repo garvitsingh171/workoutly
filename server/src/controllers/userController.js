@@ -1,6 +1,13 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
+
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || '7d',
+  });
+};
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -8,13 +15,14 @@ const AppError = require('../utils/AppError');
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
     if (!name || !email || !password) {
       return next(new AppError('Please add all fields', 400));
     }
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: normalizedEmail });
 
     if (userExists) {
       return next(new AppError('User already exists', 400));
@@ -27,16 +35,29 @@ const registerUser = async (req, res, next) => {
     // Create user
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword
     });
 
     if (user) {
+      const token = generateToken(user._id);
+
+      const userResponse = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
       return res.status(201).json({
         success: true,
+        message: 'Registration successful',
         _id: user.id,
         name: user.name,
         email: user.email,
+        token,
+        user: userResponse,
       });
     }
 
