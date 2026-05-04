@@ -14,16 +14,19 @@ const ConnectionTest = () => {
     setMessage('');
 
     try {
-      const response = await api.get('/api/health');
+      const response = await api.get('/api/health', { timeout: 30000 });
       const data = response.data;
       setMessage(data.message);
       
     } catch (err) {
       const isNetworkError = err?.message === 'Network Error';
+      const isTimeoutError = err?.code === 'ECONNABORTED' || /timeout/i.test(err?.message || '');
       const details = err.response?.data?.message || err.message;
-      const hint = isNetworkError
-        ? ' Check API URL and backend CORS allowed origins in Render.'
-        : '';
+      const hint = isTimeoutError
+        ? ' The backend may be cold-starting on Render. Try again in a few seconds or check the Render service status.'
+        : isNetworkError
+          ? ' Check API URL and backend CORS allowed origins in Render.'
+          : '';
       setError('Failed to connect to server: ' + details + hint);
       console.error('Connection test error:', err);
     } finally {
