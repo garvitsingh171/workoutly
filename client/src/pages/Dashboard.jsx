@@ -5,6 +5,9 @@ import { toast } from 'react-toastify';
 import hotToast from 'react-hot-toast';
 import api, { getErrorMessage } from '../services/api';
 import socket from '../services/socket';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
 
 const Dashboard = () => {
   const { user, loading, isAuthenticated, logout } = useAuth();
@@ -109,22 +112,17 @@ const Dashboard = () => {
     if (page < 1 || page === currentPage) {
       return;
     }
-
     setCurrentPage(page);
   };
 
   const handleDeleteWorkout = async (workoutId) => {
     const confirmed = window.confirm('Are you sure you want to delete this workout? This action cannot be undone.');
-
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     setActionError('');
 
     try {
       const response = await api.delete(`/api/workouts/${workoutId}`);
-
       if (response.data.success) {
         setWorkouts((prevWorkouts) => prevWorkouts.filter((workout) => workout._id !== workoutId));
         setPagination((prev) => ({
@@ -154,136 +152,129 @@ const Dashboard = () => {
 
   return (
     <section className="page page-dashboard">
-      <div className="dashboard-wrap">
-        <h2 className="dashboard-title">Dashboard</h2>
-        <p className="dashboard-subtext">Manage your profile and your workout history.</p>
+      <div className="dashboard-wrap" style={{ width: 'min(980px, 100%)', margin: '0 auto' }}>
+        
+        {/* Profile Header Widget */}
+        <Card style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white', border: 'none' }}>
+          <Card.Body style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ margin: 0, color: 'white', fontSize: '2rem' }}>Welcome back, {profile?.name?.split(' ')[0] || 'Athlete'}!</h2>
+              <p style={{ margin: '0.5rem 0 0', opacity: 0.9 }}>Ready to crush your goals today?</p>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+               <Button variant="ghost" style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }} onClick={logout}>
+                Logout
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
 
-        {profileLoading && <p className="dashboard-subtext">Loading your profile from API...</p>}
         {profileError && <div className="alert alert-error">{profileError}</div>}
+        {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
+        {actionError && <div className="alert alert-error">{actionError}</div>}
 
-        <div className="dashboard-card">
-          <p className="dashboard-item">
-            <strong>Name:</strong> {profile?.name || user?.name || 'N/A'}
-          </p>
-          <p className="dashboard-item">
-            <strong>Email:</strong> {profile?.email || user?.email || 'N/A'}
-          </p>
-          <p className="dashboard-item">
-            <strong>User ID:</strong> {profile?._id || user?._id || 'N/A'}
-          </p>
+        {/* Workout List Section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h3 style={{ margin: 0 }}>Your Routines</h3>
+          <Link to="/workouts/create" style={{ textDecoration: 'none' }}>
+            <Button variant="primary">+ Create Routine</Button>
+          </Link>
         </div>
 
-        <div className="workout-list-wrap">
-          <div className="workout-list-header">
-            <h3 className="workout-list-title">Your Workouts</h3>
-            <Link to="/workouts/create" className="btn btn-primary workout-list-create-btn">
-              + Create Workout
-            </Link>
-          </div>
-
-          {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
-          {actionError && <div className="alert alert-error">{actionError}</div>}
-
-          {workoutsLoading ? (
-            <p className="dashboard-subtext">Loading workouts...</p>
-          ) : workouts.length === 0 ? (
-            <div className="workout-empty-state">
-              <p>You have not created any workouts yet.</p>
-              <Link to="/workouts/create" className="auth-link">
-                Create your first workout
+        {workoutsLoading ? (
+          <p className="dashboard-subtext">Loading workouts...</p>
+        ) : workouts.length === 0 ? (
+          <Card style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.5)' }}>
+            <Card.Body>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏋️</div>
+              <h3 style={{ marginBottom: '0.5rem' }}>No routines yet</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                Create your first workout routine to start tracking your progress and hitting PRs.
+              </p>
+              <Link to="/workouts/create" style={{ textDecoration: 'none' }}>
+                <Button variant="primary" size="lg">Create First Workout</Button>
               </Link>
-            </div>
-          ) : (
-            <>
-              <div className="workout-card-grid">
-                {workouts.map((workout) => (
-                  <article className="workout-card" key={workout._id}>
-                    {workout.coverImage && (
-                      <img
-                        src={workout.coverImage}
-                        alt={`Cover image for ${workout.name}`}
-                        style={{
-                          width: '100%',
-                          maxHeight: '180px',
-                          objectFit: 'cover',
-                          borderRadius: '0.9rem',
-                          marginBottom: '0.75rem',
-                        }}
-                      />
-                    )}
-
-                    <div className="workout-card-top">
-                      <h4 className="workout-card-title">{workout.name}</h4>
-                      <span className="workout-badge">{workout.difficulty}</span>
+            </Card.Body>
+          </Card>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              {workouts.map((workout) => (
+                <Card key={workout._id} style={{ display: 'flex', flexDirection: 'column' }}>
+                  {workout.coverImage && (
+                    <img
+                      src={workout.coverImage}
+                      alt={workout.name}
+                      style={{
+                        width: '100%',
+                        height: '160px',
+                        objectFit: 'cover',
+                        borderTopLeftRadius: 'var(--radius-lg)',
+                        borderTopRightRadius: 'var(--radius-lg)'
+                      }}
+                    />
+                  )}
+                  
+                  <Card.Body style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '1.25rem' }}>{workout.name}</h4>
+                      <Badge color={workout.difficulty === 'beginner' ? 'success' : workout.difficulty === 'intermediate' ? 'warning' : 'primary'}>
+                        {workout.difficulty}
+                      </Badge>
                     </div>
 
-                    <p className="workout-card-meta">
-                      Duration: <strong>{workout.duration} min</strong>
-                    </p>
-                    <p className="workout-card-meta">
-                      Exercises: <strong>{workout.exercises?.length || 0}</strong>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                      {workout.duration} min • {workout.exercises?.length || 0} exercises
                     </p>
 
-                    <ul className="workout-exercise-preview">
+                    <ul style={{ margin: '0 0 1rem 0', padding: 0, listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', flex: 1 }}>
                       {(workout.exercises || []).slice(0, 3).map((exercise, index) => (
-                        <li key={`${workout._id}-${exercise.name}-${index + 1}`}>
-                          {exercise.name}: {exercise.sets} sets x {exercise.reps} reps
+                        <li key={index} style={{ marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          • {exercise.sets}x{exercise.reps} {exercise.name}
                         </li>
                       ))}
+                      {(workout.exercises?.length > 3) && <li>• ...and more</li>}
                     </ul>
 
-                    {workout.notes ? <p className="workout-card-notes">{workout.notes}</p> : null}
-
-                    <div className="workout-card-actions">
-                      <Link to={`/workouts/edit/${workout._id}`} className="btn btn-dark workout-card-action-btn">
-                        Edit
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                      <Link to={`/workouts/session/${workout._id}`} style={{ flex: 2, textDecoration: 'none' }}>
+                        <Button variant="primary" fullWidth>Start Session</Button>
                       </Link>
-                      <button
-                        type="button"
-                        className="btn btn-danger workout-card-action-btn"
-                        onClick={() => handleDeleteWorkout(workout._id)}
-                      >
-                        Delete
-                      </button>
+                      <Link to={`/workouts/edit/${workout._id}`} style={{ flex: 1, textDecoration: 'none' }}>
+                        <Button variant="secondary" fullWidth>Edit</Button>
+                      </Link>
+                      <Button variant="danger" onClick={() => handleDeleteWorkout(workout._id)}>
+                         ✕
+                      </Button>
                     </div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
 
-                    <p className="workout-card-date">
-                      Created on {new Date(workout.createdAt).toLocaleDateString()}
-                    </p>
-                  </article>
-                ))}
-              </div>
-
-              <div className="pagination-controls">
-                <button
-                  type="button"
-                  className="btn btn-dark pagination-button"
+            {pagination.totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+                <Button 
+                  variant="ghost" 
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
                 >
                   Previous
-                </button>
-
-                <p className="pagination-info">
-                  Page {pagination.page} of {pagination.totalPages || 1} ({pagination.total} total workouts)
-                </p>
-
-                <button
-                  type="button"
-                  className="btn btn-dark pagination-button"
+                </Button>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  Page {pagination.page} of {pagination.totalPages}
+                </span>
+                <Button 
+                  variant="ghost" 
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!pagination.hasNextPage}
                 >
                   Next
-                </button>
+                </Button>
               </div>
-            </>
-          )}
-        </div>
-
-        <button className="btn btn-danger" onClick={logout}>
-          Logout
-        </button>
+            )}
+          </>
+        )}
       </div>
     </section>
   );

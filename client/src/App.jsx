@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateWorkout from './pages/CreateWorkout';
 import EditWorkout from './pages/EditWorkout';
+import ActiveSession from './pages/ActiveSession';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
@@ -73,6 +74,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <EditWorkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/workouts/session/:id"
+                element={
+                  <ProtectedRoute>
+                    <ActiveSession />
                   </ProtectedRoute>
                 }
               />

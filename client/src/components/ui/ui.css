@@ -1,0 +1,192 @@
+/* Button Styles */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ui-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ui-btn--full {
+  width: 100%;
+}
+
+/* Button Sizes */
+.ui-btn--sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+}
+
+.ui-btn--md {
+  padding: 0.75rem var(--space-4);
+  font-size: 1rem;
+}
+
+.ui-btn--lg {
+  padding: var(--space-3) var(--space-5);
+  font-size: 1.125rem;
+}
+
+/* Button Variants */
+.ui-btn--primary {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(255, 81, 0, 0.2);
+}
+
+.ui-btn--primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.ui-btn--secondary {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.ui-btn--secondary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.ui-btn--danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.ui-btn--danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.ui-btn--ghost {
+  background-color: transparent;
+  color: var(--text-strong);
+  border: 1px solid var(--border);
+}
+
+.ui-btn--ghost:hover:not(:disabled) {
+  background-color: var(--border);
+}
+
+/* Input Styles */
+.ui-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.ui-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.ui-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-strong);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.ui-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ui-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 81, 0, 0.15);
+}
+
+.ui-input--error {
+  border-color: var(--danger);
+}
+
+.ui-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.ui-error-text {
+  font-size: 0.875rem;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* Card Styles */
+.ui-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-card__header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ui-card__body {
+  padding: var(--space-4);
+  flex: 1;
+}
+
+.ui-card__footer {
+  padding: var(--space-4);
+  background-color: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Badge Styles */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
+}
+
+.ui-badge--neutral {
+  background-color: var(--border);
+  color: var(--text-strong);
+}
+
+.ui-badge--success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.ui-badge--warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #D97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.ui-badge--primary {
+  background-color: rgba(255, 81, 0, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(255, 81, 0, 0.2);
+}
