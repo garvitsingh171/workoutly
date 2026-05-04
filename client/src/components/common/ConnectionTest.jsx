@@ -6,6 +6,7 @@ const ConnectionTest = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const frontendUrl = window.location.origin;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const testConnection = async () => {
     setLoading(true);
@@ -18,7 +19,12 @@ const ConnectionTest = () => {
       setMessage(data.message);
       
     } catch (err) {
-      setError('Failed to connect to server: ' + (err.response?.data?.message || err.message));
+      const isNetworkError = err?.message === 'Network Error';
+      const details = err.response?.data?.message || err.message;
+      const hint = isNetworkError
+        ? ' Check API URL and backend CORS allowed origins in Render.'
+        : '';
+      setError('Failed to connect to server: ' + details + hint);
       console.error('Connection test error:', err);
     } finally {
       setLoading(false);
@@ -51,6 +57,7 @@ const ConnectionTest = () => {
 
       <div className="connection-info">
         <p><strong>API Path:</strong> /api/health (proxied in development)</p>
+        <p><strong>API Base URL:</strong> {apiBaseUrl}</p>
         <p><strong>Frontend Origin:</strong> {frontendUrl}</p>
         <p><strong>Using:</strong> Vite Proxy + Express CORS</p>
       </div>
