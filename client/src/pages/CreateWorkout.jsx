@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api, { getErrorMessage } from "../services/api";
 import ImageUpload from "../components/ImageUpload";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import Input from "../components/ui/Input";
 
 const defaultExercise = {
   name: "",
@@ -53,15 +56,10 @@ const CreateWorkout = () => {
 
   const handleRemoveExercise = (index) => {
     setFormData((prev) => {
-      if (prev.exercises.length === 1) {
-        return prev;
-      }
-
+      if (prev.exercises.length === 1) return prev;
       return {
         ...prev,
-        exercises: prev.exercises.filter(
-          (_, currentIndex) => currentIndex !== index,
-        ),
+        exercises: prev.exercises.filter((_, currentIndex) => currentIndex !== index),
       };
     });
   };
@@ -77,9 +75,6 @@ const CreateWorkout = () => {
         throw new Error("Upload failed. Please try again.");
       }
 
-      // TODO: If a user uploads another image before saving the workout,
-      // the previously uploaded Cloudinary asset becomes orphaned.
-      // A future improvement can delete the previous publicId before replacing it.
       setUploadedImage({
         url: response.data.url,
         publicId: response.data.publicId,
@@ -88,13 +83,9 @@ const CreateWorkout = () => {
 
       toast.success("Cover image uploaded successfully.");
     } catch (uploadRequestError) {
-      const message = getErrorMessage(
-        uploadRequestError,
-        "Image upload failed. Please try again.",
-      );
+      const message = getErrorMessage(uploadRequestError, "Image upload failed. Please try again.");
       setUploadError(message);
       toast.error(message);
-      throw uploadRequestError;
     } finally {
       setIsUploadingImage(false);
     }
@@ -125,23 +116,11 @@ const CreateWorkout = () => {
     try {
       const response = await api.post("/api/workouts", payload);
       if (response.data.success) {
-        toast.success("Workout created successfully!");
-        setFormData({
-          name: "",
-          duration: 45,
-          difficulty: "beginner",
-          notes: "",
-          exercises: [defaultExercise],
-        });
-        setUploadedImage(null);
-        setUploadError("");
+        toast.success("Workout template created successfully!");
         navigate("/dashboard");
       }
     } catch (requestError) {
-      const message = getErrorMessage(
-        requestError,
-        "Failed to create workout. Please try again.",
-      );
+      const message = getErrorMessage(requestError, "Failed to create workout. Please try again.");
       setError(message);
       toast.error(message);
     } finally {
@@ -151,231 +130,170 @@ const CreateWorkout = () => {
 
   return (
     <section className="page page-dashboard">
-      <div className="dashboard-wrap">
-        <h2 className="dashboard-title">Create Workout</h2>
-        <p className="dashboard-subtext">
-          Build a routine that you can track over time.
-        </p>
-        <div className="workout-upload-panel">
-          <h3 className="workout-exercises__title">Workout Cover Image</h3>
-          <p className="dashboard-subtext">
-            Add a visual cover for this workout. Your image is uploaded securely
-            before you publish your routine.
-          </p>
-          <ImageUpload onUpload={handleImageUpload} />
-
-          {isUploadingImage && (
-            <p className="dashboard-subtext">Uploading image, please wait...</p>
-          )}
-
-          {uploadError && <div className="alert alert-error">{uploadError}</div>}
-
-          {uploadedImage && (
-            <div className="upload-result-card">
-              <img
-                src={uploadedImage.url}
-                alt={uploadedImage.fileName}
-                className="upload-result-card__image"
-              />
-              <div className="upload-result-card__content">
-                <p className="upload-result-card__title">Upload complete</p>
-                <p className="upload-result-card__meta">
-                  {uploadedImage.fileName}
-                </p>
-                <a
-                  className="auth-link"
-                  href={uploadedImage.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open hosted image
-                </a>
-              </div>
-            </div>
-          )}
+      <div className="dashboard-wrap" style={{ width: 'min(800px, 100%)', margin: '0 auto', textAlign: 'left' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Create Template</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Build a reusable routine to track your sessions.</p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form className="form form-stack workout-form" onSubmit={handleSubmit}>
-          <div className="form-field">
-            <label htmlFor="workoutName" className="form-label">
-              Workout Name
-            </label>
-            <input
-              id="workoutName"
-              name="name"
-              type="text"
-              className="form-input"
-              placeholder="Push Day, Leg Strength, HIIT Burn..."
-              value={formData.name}
-              onChange={handleFieldChange}
-              required
-            />
-          </div>
-
-          <div className="workout-form-grid">
-            <div className="form-field">
-              <label htmlFor="duration" className="form-label">
-                Duration (minutes)
-              </label>
-              <input
-                id="duration"
-                name="duration"
-                type="number"
-                min="1"
-                max="600"
-                className="form-input"
-                value={formData.duration}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          <Card>
+            <Card.Body>
+              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Workout Details</h3>
+              
+              <Input
+                label="Workout Name"
+                name="name"
+                type="text"
+                placeholder="e.g., Push Day, Leg Strength, HIIT Burn"
+                value={formData.name}
                 onChange={handleFieldChange}
                 required
               />
-            </div>
 
-            <div className="form-field">
-              <label htmlFor="difficulty" className="form-label">
-                Difficulty
-              </label>
-              <select
-                id="difficulty"
-                name="difficulty"
-                className="form-input"
-                value={formData.difficulty}
-                onChange={handleFieldChange}
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <Input
+                  label="Duration (minutes)"
+                  name="duration"
+                  type="number"
+                  min="1"
+                  max="600"
+                  value={formData.duration}
+                  onChange={handleFieldChange}
+                  required
+                />
 
-          <div className="form-field">
-            <label htmlFor="notes" className="form-label">
-              Notes (Optional)
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              className="form-input"
-              rows="4"
-              maxLength="500"
-              placeholder="Goals, warm-up, cooldown, or special instructions..."
-              value={formData.notes}
-              onChange={handleFieldChange}
-            />
-          </div>
-
-          <div className="workout-exercises">
-            <div className="workout-exercises__header">
-              <h3 className="workout-exercises__title">Exercises</h3>
-              <button
-                type="button"
-                className="btn btn-dark workout-exercises__add"
-                onClick={handleAddExercise}
-              >
-                + Add Exercise
-              </button>
-            </div>
-
-            {formData.exercises.map((exercise, index) => (
-              <div
-                className="workout-exercise-row"
-                key={`exercise-${index + 1}`}
-              >
-                <div className="form-field">
-                  <label
-                    className="form-label"
-                    htmlFor={`exercise-name-${index}`}
+                <div className="ui-input-group">
+                  <label htmlFor="difficulty" className="ui-label">Difficulty</label>
+                  <select
+                    id="difficulty"
+                    name="difficulty"
+                    className="ui-input"
+                    value={formData.difficulty}
+                    onChange={handleFieldChange}
                   >
-                    Exercise Name
-                  </label>
-                  <input
-                    id={`exercise-name-${index}`}
-                    className="form-input"
-                    type="text"
-                    value={exercise.name}
-                    onChange={(event) =>
-                      handleExerciseChange(index, "name", event.target.value)
-                    }
-                    placeholder="Squat, Push Up, Plank..."
-                    required
-                  />
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
                 </div>
-
-                <div className="form-field">
-                  <label
-                    className="form-label"
-                    htmlFor={`exercise-sets-${index}`}
-                  >
-                    Sets
-                  </label>
-                  <input
-                    id={`exercise-sets-${index}`}
-                    className="form-input"
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={exercise.sets}
-                    onChange={(event) =>
-                      handleExerciseChange(index, "sets", event.target.value)
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="form-field">
-                  <label
-                    className="form-label"
-                    htmlFor={`exercise-reps-${index}`}
-                  >
-                    Reps
-                  </label>
-                  <input
-                    id={`exercise-reps-${index}`}
-                    className="form-input"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={exercise.reps}
-                    onChange={(event) =>
-                      handleExerciseChange(index, "reps", event.target.value)
-                    }
-                    required
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-danger workout-exercise-row__remove"
-                  onClick={() => handleRemoveExercise(index)}
-                  disabled={formData.exercises.length === 1}
-                >
-                  Remove
-                </button>
               </div>
-            ))}
-          </div>
 
-          <div className="workout-form-actions">
-            <button
-              type="button"
-              className="btn btn-dark"
-              onClick={() => navigate("/dashboard")}
-            >
+              <div className="ui-input-group" style={{ marginTop: '0.5rem' }}>
+                <label htmlFor="notes" className="ui-label">Notes (Optional)</label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  className="ui-input"
+                  rows="3"
+                  maxLength="500"
+                  placeholder="Goals, warm-up, cooldown, or special instructions..."
+                  value={formData.notes}
+                  onChange={handleFieldChange}
+                />
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Cover Image</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                Add a visual cover for this workout template.
+              </p>
+              <ImageUpload onUpload={handleImageUpload} />
+
+              {isUploadingImage && <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Uploading image...</p>}
+              {uploadError && <div className="alert alert-error" style={{ marginTop: '1rem' }}>{uploadError}</div>}
+
+              {uploadedImage && (
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
+                  <img
+                    src={uploadedImage.url}
+                    alt={uploadedImage.fileName}
+                    style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
+                  />
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 600 }}>Upload complete</p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{uploadedImage.fileName}</p>
+                  </div>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Exercises</h3>
+                <Button type="button" variant="ghost" size="sm" onClick={handleAddExercise}>
+                  + Add Exercise
+                </Button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {formData.exercises.map((exercise, index) => (
+                  <div key={`exercise-${index}`} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', alignItems: 'end', background: 'var(--bg)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
+                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Name</label>
+                      <input
+                        className="ui-input"
+                        type="text"
+                        value={exercise.name}
+                        onChange={(e) => handleExerciseChange(index, "name", e.target.value)}
+                        placeholder="e.g. Squat"
+                        required
+                      />
+                    </div>
+                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
+                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Sets</label>
+                      <input
+                        className="ui-input"
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={exercise.sets}
+                        onChange={(e) => handleExerciseChange(index, "sets", e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
+                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Reps</label>
+                      <input
+                        className="ui-input"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={exercise.reps}
+                        onChange={(e) => handleExerciseChange(index, "reps", e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      style={{ color: 'var(--danger)', padding: '0.75rem' }}
+                      onClick={() => handleRemoveExercise(index)}
+                      disabled={formData.exercises.length === 1}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+            <Button type="button" variant="ghost" onClick={() => navigate("/dashboard")}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={isSubmitting || isUploadingImage}
-            >
-              {isSubmitting
-                ? "Creating..."
-                : isUploadingImage
-                  ? "Uploading image..."
-                  : "Create Workout"}
-            </button>
+            </Button>
+            <Button type="submit" variant="primary" disabled={isSubmitting || isUploadingImage}>
+              {isSubmitting ? "Saving..." : "Save Template"}
+            </Button>
           </div>
         </form>
       </div>
