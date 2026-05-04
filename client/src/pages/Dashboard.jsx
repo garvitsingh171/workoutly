@@ -156,13 +156,13 @@ const Dashboard = () => {
         
         {/* Profile Header Widget */}
         <Card style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white', border: 'none' }}>
-          <Card.Body style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <Card.Body className="dashboard-card-body">
             <div>
               <h2 style={{ margin: 0, color: 'white', fontSize: '2rem' }}>Welcome back, {profile?.name?.split(' ')[0] || 'Athlete'}!</h2>
               <p style={{ margin: '0.5rem 0 0', opacity: 0.9 }}>Ready to crush your goals today?</p>
             </div>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-               <Button variant="ghost" style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }} onClick={logout}>
+            <div className="dashboard-card-actions">
+               <Button variant="ghost" style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }} onClick={logout} fullWidth>
                 Logout
               </Button>
             </div>
@@ -174,10 +174,10 @@ const Dashboard = () => {
         {actionError && <div className="alert alert-error">{actionError}</div>}
 
         {/* Workout List Section */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div className="dashboard-section-header">
           <h3 style={{ margin: 0 }}>Your Routines</h3>
           <Link to="/workouts/create" style={{ textDecoration: 'none' }}>
-            <Button variant="primary">+ Create Routine</Button>
+            <Button variant="primary" fullWidth>+ Create Routine</Button>
           </Link>
         </div>
 
@@ -253,11 +253,12 @@ const Dashboard = () => {
             </div>
 
             {pagination.totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+              <div className="dashboard-pagination">
                 <Button 
                   variant="ghost" 
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
+                  fullWidth
                 >
                   Previous
                 </Button>
@@ -268,6 +269,7 @@ const Dashboard = () => {
                   variant="ghost" 
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!pagination.hasNextPage}
+                  fullWidth
                 >
                   Next
                 </Button>

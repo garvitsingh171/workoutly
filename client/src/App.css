@@ -281,7 +281,81 @@
 }
 
 /* -------------------------------------
-   Dashboard Overrides
+   Responsive Media Queries
+-------------------------------------- */
+@media (max-width: 1024px) {
+  .page {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-header {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .site-header__nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .hero {
+    padding: 2rem 0;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .hero-actions a {
+    width: 100%;
+  }
+
+  .page {
+    padding: 1rem;
+  }
+
+  .panel {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Dashboard specific responsive adjustments */
+  .dashboard-card-body {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .dashboard-card-actions {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .dashboard-section-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 1rem;
+  }
+
+  .dashboard-section-header a {
+    width: 100%;
+  }
+
+  .dashboard-pagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* -------------------------------------
+   Dashboard Utility Classes
 -------------------------------------- */
 .dashboard-wrap {
   width: 100%;
@@ -289,7 +363,6 @@
   margin: 0 auto;
 }
 
-/* Dashboard items often inherit legacy css, making sure we normalize them */
 .dashboard-card {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
@@ -298,19 +371,30 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Media Queries */
-@media (max-width: 768px) {
-  .site-header {
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
-  }
-  
-  .hero h1 {
-    font-size: 2.5rem;
-  }
-  
-  .page {
-    padding: 1rem;
-  }
+.dashboard-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
+
+.dashboard-card-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.dashboard-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
