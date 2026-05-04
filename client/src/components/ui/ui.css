@@ -41,22 +41,25 @@
 .ui-btn--primary {
   background-color: var(--primary);
   color: white;
-  box-shadow: 0 4px 14px rgba(255, 81, 0, 0.2);
+  box-shadow: var(--shadow-primary);
 }
 
 .ui-btn--primary:hover:not(:disabled) {
   background-color: var(--primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 81, 0, 0.3);
 }
 
 .ui-btn--secondary {
   background-color: var(--secondary);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .ui-btn--secondary:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  background-color: #111827; /* Darker secondary */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .ui-btn--danger {
@@ -65,8 +68,8 @@
 }
 
 .ui-btn--danger:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  background-color: #DC2626;
+  transform: translateY(-2px);
 }
 
 .ui-btn--ghost {
@@ -77,6 +80,8 @@
 
 .ui-btn--ghost:hover:not(:disabled) {
   background-color: var(--border);
+  color: var(--primary);
+  border-color: var(--primary-light);
 }
 
 /* Input Styles */
@@ -112,7 +117,7 @@
 .ui-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(255, 81, 0, 0.15);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .ui-input--error {
@@ -186,7 +191,7 @@
 }
 
 .ui-badge--primary {
-  background-color: rgba(255, 81, 0, 0.1);
+  background-color: var(--primary-light);
   color: var(--primary);
   border: 1px solid rgba(255, 81, 0, 0.2);
 }

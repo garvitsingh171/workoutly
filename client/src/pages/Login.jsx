@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from '../services/api';
+import Button from '../components/ui/Button';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -129,13 +130,14 @@ const Login = () => {
             {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
-          <button
+          <Button
             type="submit"
-            className={isLoading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
+            variant="primary"
+            fullWidth
             disabled={isLoading}
           >
             {isLoading ? 'Logging in...' : 'Login'}
-          </button>
+          </Button>
         </form>
 
         <p className="auth-link-text">

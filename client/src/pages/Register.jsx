@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from "../services/api";
+import Button from '../components/ui/Button';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -213,14 +214,14 @@ const Register = () => {
             )}
           </div>
 
-          {/* Submit Button */}
-          <button
+          <Button
             type="submit"
-            className={isLoading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
+            variant="primary"
+            fullWidth
             disabled={isLoading}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
-          </button>
+          </Button>
         </form>
 
         {/* Login Link */}

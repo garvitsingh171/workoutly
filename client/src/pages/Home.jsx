@@ -1,88 +1,64 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import ConnectionTest from "../components/common/ConnectionTest";
+import { Link, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Button from '../components/ui/Button';
 
 const Home = () => {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    setIsLoading(true);
+  if (loading) {
+    return (
+      <div className="page-state">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-    if (!email.trim()) {
-      setError("Email is required");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address");
-      setIsLoading(false);
-      return;
-    }
-
-    setTimeout(() => {
-      setSuccessMessage("You are all set. Create your account to continue.");
-      setIsLoading(false);
-    }, 500);
-  };
+  if (isAuthenticated()) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
-    <section className="page page-home">
-      <div className="home-grid">
-        <div className="panel panel-auth">
-          <h1 className="panel-title">Welcome to Workoutly</h1>
-          <p className="panel-subtitle">
-          Build your routine, track your progress, and stay consistent.
-          </p>
+    <div className="page" style={{ padding: 0 }}>
+      {/* Hero Section */}
+      <section className="hero">
+        <h1>
+          Push Your Limits with <span>Workoutly</span>
+        </h1>
+        <p>
+          The simple, intuitive, and powerful way to track your fitness journey.
+          Log your exercises, analyze your progress, and hit those PRs.
+        </p>
+        <div className="hero-actions">
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <Button variant="primary" size="lg">Start Tracking Free</Button>
+          </Link>
+          <Link to="/login" style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" size="lg">I already have an account</Button>
+          </Link>
+        </div>
+      </section>
 
-          {successMessage && <div className="alert alert-success">{successMessage}</div>}
-          {error && <div className="alert alert-error">{error}</div>}
-
-          <form className="form form-stack" onSubmit={handleSubmit}>
-            <div className="form-field">
-              <label htmlFor="quickEmail" className="form-label">
-              Email
-              </label>
-              <input
-                id="quickEmail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className={error ? 'form-input form-input-error' : 'form-input'}
-                disabled={isLoading}
-              />
-              {error && <span className="field-error">{error}</span>}
-            </div>
-
-            <button
-              type="submit"
-              className={isLoading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Checking...' : 'Get Started'}
-            </button>
-          </form>
-
-          <p className="auth-link-text">
-            New here? <Link to="/register" className="auth-link">Create account</Link>
-          </p>
-          <p className="auth-link-text">
-            Already a member? <Link to="/login" className="auth-link">Login here</Link>
-          </p>
+      {/* Features Section */}
+      <section className="features">
+        <div className="feature-card">
+          <div className="feature-icon">📝</div>
+          <h3 className="feature-title">Log Workouts</h3>
+          <p className="feature-desc">Easily log sets, reps, and weights for every exercise you do in the gym or at home.</p>
+        </div>
+        
+        <div className="feature-card">
+          <div className="feature-icon">📈</div>
+          <h3 className="feature-title">Track Progress</h3>
+          <p className="feature-desc">Visualize your strength gains over time and stay motivated with detailed workout histories.</p>
         </div>
 
-        <div className="home-connection">
-          <ConnectionTest />
+        <div className="feature-card">
+          <div className="feature-icon">🎯</div>
+          <h3 className="feature-title">Hit Your Goals</h3>
+          <p className="feature-desc">Set personal records, stay consistent, and watch your fitness dreams become reality.</p>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 };
 

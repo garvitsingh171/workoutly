@@ -2,19 +2,20 @@
   /* Colors */
   --primary: #FF5100;
   --primary-hover: #E64900;
-  --secondary: #4338CA;
-  --bg: #F8FAFC;
+  --primary-light: rgba(255, 81, 0, 0.1);
+  --secondary: #1F2937;
+  --bg: #F9FAFB;
   --surface: #FFFFFF;
-  --text-strong: #0F172A;
-  --text-muted: #64748B;
+  --text-strong: #111827;
+  --text-muted: #6B7280;
   --success: #10B981;
   --danger: #EF4444;
-  --border: #E2E8F0;
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --border: #E5E7EB;
+  --glass-bg: rgba(255, 255, 255, 0.9);
 
   /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Spacing Grid */
   --space-1: 0.25rem; /* 4px */
@@ -23,15 +24,20 @@
   --space-4: 1.5rem;  /* 24px */
   --space-5: 2rem;    /* 32px */
   --space-6: 3rem;    /* 48px */
+  --space-8: 4rem;    /* 64px */
 
   /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-card: 0px 4px 20px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0px 8px 24px rgba(17, 24, 39, 0.06);
+  --shadow-primary: 0 4px 14px rgba(255, 81, 0, 0.25);
 }
 
 *, *::before, *::after {
@@ -39,11 +45,12 @@
 }
 
 html, body, #root {
-  min-height: 100%;
+  min-height: 100vh;
 }
 
 html {
   font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -61,20 +68,23 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text-strong);
+  line-height: 1.2;
 }
 
-h1 { font-size: 2.5rem; letter-spacing: -0.02em; }
-h2 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.01em; }
-h3 { font-size: 1.25rem; font-weight: 600; }
+h1 { font-size: 3rem; letter-spacing: -0.02em; }
+h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.5rem; font-weight: 600; }
+h4 { font-size: 1.25rem; font-weight: 600; }
 
 p {
   margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
 a:hover {
@@ -91,6 +101,6 @@ img, svg {
 }
 
 ::selection {
-  background: rgba(255, 81, 0, 0.2);
-  color: var(--text-strong);
+  background: var(--primary-light);
+  color: var(--primary);
 }
