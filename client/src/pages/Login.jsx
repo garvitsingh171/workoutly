@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from '../services/api';
 import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -96,39 +97,29 @@ const Login = () => {
         {apiError && <div className="alert alert-error">{apiError}</div>}
 
         <form onSubmit={handleSubmit} className="form form-stack">
-          <div className="form-field">
-            <label htmlFor="email" className="form-label">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className={errors.email ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.email && <span className="field-error">{errors.email}</span>}
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            error={errors.email}
+            disabled={isLoading}
+          />
 
-          <div className="form-field">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className={errors.password ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.password && <span className="field-error">{errors.password}</span>}
-          </div>
+          <Input
+            label="Password"
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+            error={errors.password}
+            disabled={isLoading}
+          />
 
           <Button
             type="submit"

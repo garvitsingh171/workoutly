@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from "../services/api";
 import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -138,81 +139,53 @@ const Register = () => {
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="form form-stack">
-          {/* Name Field */}
-          <div className="form-field">
-            <label htmlFor="name" className="form-label">
-              Name *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              className={errors.name ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.name && <span className="field-error">{errors.name}</span>}
-          </div>
+          <Input
+            label="Name *"
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your full name"
+            error={errors.name}
+            disabled={isLoading}
+          />
 
-          {/* Email Field */}
-          <div className="form-field">
-            <label htmlFor="email" className="form-label">
-              Email *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className={errors.email ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.email && <span className="field-error">{errors.email}</span>}
-          </div>
+          <Input
+            label="Email *"
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            error={errors.email}
+            disabled={isLoading}
+          />
 
-          {/* Password Field */}
-          <div className="form-field">
-            <label htmlFor="password" className="form-label">
-              Password *
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password (min 6 characters)"
-              className={errors.password ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.password && (
-              <span className="field-error">{errors.password}</span>
-            )}
-          </div>
+          <Input
+            label="Password *"
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Create a password (min 6 characters)"
+            error={errors.password}
+            disabled={isLoading}
+          />
 
-          {/* Confirm Password Field */}
-          <div className="form-field">
-            <label htmlFor="confirmPassword" className="form-label">
-              Confirm Password *
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              className={errors.confirmPassword ? 'form-input form-input-error' : 'form-input'}
-              disabled={isLoading}
-            />
-            {errors.confirmPassword && (
-              <span className="field-error">{errors.confirmPassword}</span>
-            )}
-          </div>
+          <Input
+            label="Confirm Password *"
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Re-enter your password"
+            error={errors.confirmPassword}
+            disabled={isLoading}
+          />
 
           <Button
             type="submit"
