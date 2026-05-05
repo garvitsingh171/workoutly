@@ -10,6 +10,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
 }
 
 .ui-btn:disabled {
@@ -23,18 +26,18 @@
 
 /* Button Sizes */
 .ui-btn--sm {
-  padding: var(--space-2) var(--space-3);
-  font-size: 0.875rem;
+  padding: clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 1rem);
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
 }
 
 .ui-btn--md {
-  padding: 0.75rem var(--space-4);
-  font-size: 1rem;
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 3vw, 1rem);
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 .ui-btn--lg {
-  padding: var(--space-3) var(--space-5);
-  font-size: 1.125rem;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 4vw, 1.25rem);
+  font-size: clamp(0.95rem, 1.5vw, 1.125rem);
 }
 
 /* Button Variants */
@@ -44,10 +47,17 @@
   box-shadow: var(--shadow-primary);
 }
 
-.ui-btn--primary:hover:not(:disabled) {
-  background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 81, 0, 0.3);
+.ui-btn--primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(255, 81, 0, 0.3);
+}
+
+@media (hover: hover) {
+  .ui-btn--primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 81, 0, 0.3);
+  }
 }
 
 .ui-btn--secondary {
@@ -56,10 +66,17 @@
   box-shadow: var(--shadow-sm);
 }
 
-.ui-btn--secondary:hover:not(:disabled) {
-  background-color: #111827; /* Darker secondary */
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.ui-btn--secondary:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+@media (hover: hover) {
+  .ui-btn--secondary:hover:not(:disabled) {
+    background-color: #111827;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .ui-btn--danger {
@@ -67,9 +84,15 @@
   color: white;
 }
 
-.ui-btn--danger:hover:not(:disabled) {
-  background-color: #DC2626;
-  transform: translateY(-2px);
+.ui-btn--danger:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .ui-btn--danger:hover:not(:disabled) {
+    background-color: #DC2626;
+    transform: translateY(-2px);
+  }
 }
 
 .ui-btn--ghost {
@@ -78,10 +101,16 @@
   border: 1px solid var(--border);
 }
 
-.ui-btn--ghost:hover:not(:disabled) {
-  background-color: var(--border);
-  color: var(--primary);
-  border-color: var(--primary-light);
+.ui-btn--ghost:active {
+  background-color: rgba(229, 231, 235, 0.5);
+}
+
+@media (hover: hover) {
+  .ui-btn--ghost:hover:not(:disabled) {
+    background-color: var(--border);
+    color: var(--primary);
+    border-color: var(--primary-light);
+  }
 }
 
 /* Input Styles */
@@ -89,25 +118,27 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-bottom: var(--space-3);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
 }
 
 .ui-label {
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
   font-weight: 600;
   color: var(--text-strong);
 }
 
 .ui-input {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
   color: var(--text-strong);
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .ui-input::placeholder {
@@ -129,7 +160,7 @@
 }
 
 .ui-error-text {
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
   color: var(--danger);
   font-weight: 500;
 }
@@ -146,17 +177,17 @@
 }
 
 .ui-card__header {
-  padding: var(--space-4);
+  padding: clamp(1rem, 3vw, 1.5rem);
   border-bottom: 1px solid var(--border);
 }
 
 .ui-card__body {
-  padding: var(--space-4);
+  padding: clamp(1rem, 3vw, 1.5rem);
   flex: 1;
 }
 
 .ui-card__footer {
-  padding: var(--space-4);
+  padding: clamp(1rem, 3vw, 1.5rem);
   background-color: var(--bg);
   border-top: 1px solid var(--border);
 }
@@ -165,8 +196,8 @@
 .ui-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
+  padding: clamp(0.2rem, 1vw, 0.25rem) clamp(0.5rem, 2vw, 0.75rem);
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

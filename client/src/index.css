@@ -49,7 +49,7 @@ html, body, #root {
 }
 
 html {
-  font-size: 16px;
+  font-size: clamp(14px, 2vw, 16px);
   scroll-behavior: smooth;
 }
 
@@ -61,6 +61,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-touch-callout: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -71,10 +72,10 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
-h1 { font-size: 3rem; letter-spacing: -0.02em; }
-h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; }
-h3 { font-size: 1.5rem; font-weight: 600; }
-h4 { font-size: 1.25rem; font-weight: 600; }
+h1 { font-size: clamp(1.75rem, 5vw, 3rem); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 600; }
+h4 { font-size: clamp(1rem, 2.5vw, 1.25rem); font-weight: 600; }
 
 p {
   margin-top: 0;
