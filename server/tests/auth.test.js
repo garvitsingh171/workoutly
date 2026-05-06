@@ -97,3 +97,5 @@ describe('Auth Routes', () => {
     expect(res.body).toHaveProperty('message');
   });
 });
+
+// Comment for testing CI pipeline after skipping tests temporarily
