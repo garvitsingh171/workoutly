@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api, { getErrorMessage } from '../services/api';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Badge from '../components/ui/Badge';
 
 const defaultExercise = {
   name: '',
@@ -145,155 +149,156 @@ const EditWorkout = () => {
   }
 
   return (
-    <section className="page page-dashboard">
-      <div className="dashboard-wrap">
-        <h2 className="dashboard-title">Edit Workout</h2>
-        <p className="dashboard-subtext">Update your routine details and save your changes.</p>
+    <section className="page page-form">
+      <div className="form-page-wrap">
+        <header className="page-heading">
+          <Badge color="primary" className="page-heading__eyebrow">Routine Editor</Badge>
+          <h1 className="page-heading__title">Edit Workout</h1>
+          <p className="page-heading__text">Update your routine details, exercise targets, and notes without changing how sessions work.</p>
+        </header>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form className="form form-stack workout-form" onSubmit={handleSubmit}>
-          <div className="form-field">
-            <label htmlFor="workoutName" className="form-label">
-              Workout Name
-            </label>
-            <input
-              id="workoutName"
-              name="name"
-              type="text"
-              className="form-input"
-              value={formData.name}
-              onChange={handleFieldChange}
-              required
-            />
-          </div>
+        <form className="workout-form" onSubmit={handleSubmit}>
+          <Card>
+            <Card.Body>
+              <h3 className="form-card__title">Workout Details</h3>
 
-          <div className="workout-form-grid">
-            <div className="form-field">
-              <label htmlFor="duration" className="form-label">
-                Duration (minutes)
-              </label>
-              <input
-                id="duration"
-                name="duration"
-                type="number"
-                min="1"
-                max="600"
-                className="form-input"
-                value={formData.duration}
+              <Input
+                label="Workout Name"
+                id="workoutName"
+                name="name"
+                type="text"
+                value={formData.name}
                 onChange={handleFieldChange}
                 required
               />
-            </div>
 
-            <div className="form-field">
-              <label htmlFor="difficulty" className="form-label">
-                Difficulty
-              </label>
-              <select
-                id="difficulty"
-                name="difficulty"
-                className="form-input"
-                value={formData.difficulty}
-                onChange={handleFieldChange}
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
-          </div>
+              <div className="form-grid form-grid--two">
+                <Input
+                  label="Duration (minutes)"
+                  id="duration"
+                  name="duration"
+                  type="number"
+                  min="1"
+                  max="600"
+                  value={formData.duration}
+                  onChange={handleFieldChange}
+                  required
+                />
 
-          <div className="form-field">
-            <label htmlFor="notes" className="form-label">
-              Notes (Optional)
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              className="form-input"
-              rows="4"
-              maxLength="500"
-              value={formData.notes}
-              onChange={handleFieldChange}
-            />
-          </div>
-
-          <div className="workout-exercises">
-            <div className="workout-exercises__header">
-              <h3 className="workout-exercises__title">Exercises</h3>
-              <button type="button" className="btn btn-dark workout-exercises__add" onClick={handleAddExercise}>
-                + Add Exercise
-              </button>
-            </div>
-
-            {formData.exercises.map((exercise, index) => (
-              <div className="workout-exercise-row" key={`exercise-${index + 1}`}>
-                <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-name-${index}`}>
-                    Exercise Name
-                  </label>
-                  <input
-                    id={`exercise-name-${index}`}
-                    className="form-input"
-                    type="text"
-                    value={exercise.name}
-                    onChange={(event) => handleExerciseChange(index, 'name', event.target.value)}
-                    required
-                  />
+                <div className="ui-input-group">
+                  <label htmlFor="difficulty" className="ui-label">Difficulty</label>
+                  <select
+                    id="difficulty"
+                    name="difficulty"
+                    className="ui-input"
+                    value={formData.difficulty}
+                    onChange={handleFieldChange}
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
                 </div>
-
-                <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-sets-${index}`}>
-                    Sets
-                  </label>
-                  <input
-                    id={`exercise-sets-${index}`}
-                    className="form-input"
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={exercise.sets}
-                    onChange={(event) => handleExerciseChange(index, 'sets', event.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-field">
-                  <label className="form-label" htmlFor={`exercise-reps-${index}`}>
-                    Reps
-                  </label>
-                  <input
-                    id={`exercise-reps-${index}`}
-                    className="form-input"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={exercise.reps}
-                    onChange={(event) => handleExerciseChange(index, 'reps', event.target.value)}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-danger workout-exercise-row__remove"
-                  onClick={() => handleRemoveExercise(index)}
-                  disabled={formData.exercises.length === 1}
-                >
-                  Remove
-                </button>
               </div>
-            ))}
-          </div>
 
-          <div className="workout-form-actions">
-            <button type="button" className="btn btn-dark" onClick={() => navigate('/dashboard')}>
+              <div className="ui-input-group">
+                <label htmlFor="notes" className="ui-label">Notes (Optional)</label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  className="ui-input"
+                  rows="4"
+                  maxLength="500"
+                  value={formData.notes}
+                  onChange={handleFieldChange}
+                />
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <div className="form-section-header">
+                <h3>Exercises</h3>
+                <Button type="button" variant="ghost" size="sm" onClick={handleAddExercise}>
+                  Add Exercise
+                </Button>
+              </div>
+
+              <div className="exercise-list">
+                {formData.exercises.map((exercise, index) => (
+                  <div className="workout-exercise-row" key={`exercise-${index + 1}`}>
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-name-${index}`}>
+                        Name
+                      </label>
+                      <input
+                        id={`exercise-name-${index}`}
+                        className="ui-input"
+                        type="text"
+                        value={exercise.name}
+                        onChange={(event) => handleExerciseChange(index, 'name', event.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-sets-${index}`}>
+                        Sets
+                      </label>
+                      <input
+                        id={`exercise-sets-${index}`}
+                        className="ui-input"
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={exercise.sets}
+                        onChange={(event) => handleExerciseChange(index, 'sets', event.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-reps-${index}`}>
+                        Reps
+                      </label>
+                      <input
+                        id={`exercise-reps-${index}`}
+                        className="ui-input"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={exercise.reps}
+                        onChange={(event) => handleExerciseChange(index, 'reps', event.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="workout-exercise-row__remove"
+                      onClick={() => handleRemoveExercise(index)}
+                      disabled={formData.exercises.length === 1}
+                      aria-label={`Remove exercise ${index + 1}`}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+
+          <div className="form-actions">
+            <Button type="button" variant="ghost" onClick={() => navigate('/dashboard')}>
               Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+            </Button>
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Update Workout'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

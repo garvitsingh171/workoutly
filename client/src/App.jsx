@@ -22,7 +22,16 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="app-shell">
-          <Toaster position="top-right" />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+              },
+            }}
+          />
           <ToastContainer
             position="top-right"
             autoClose={3000}
@@ -31,7 +40,7 @@ function App() {
             closeOnClick
             pauseOnHover
             draggable
-            theme="light"
+            theme="dark"
           />
           <Header />
           <main className="app-main">

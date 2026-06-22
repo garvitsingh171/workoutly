@@ -9,6 +9,13 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 
+const getDifficultyColor = (difficulty) => {
+  if (difficulty === 'beginner') return 'success';
+  if (difficulty === 'intermediate') return 'warning';
+  if (difficulty === 'advanced') return 'danger';
+  return 'neutral';
+};
+
 const Dashboard = () => {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const [profile, setProfile] = useState(null);
@@ -138,6 +145,19 @@ const Dashboard = () => {
     }
   };
 
+  const totalRoutines = workouts.length;
+  const totalExercises = workouts.reduce((total, workout) => total + (workout.exercises?.length || 0), 0);
+  const totalDuration = workouts.reduce((total, workout) => total + (Number(workout.duration) || 0), 0);
+  const averageDuration = totalRoutines > 0 ? Math.round(totalDuration / totalRoutines) : 0;
+  const difficultyCounts = workouts.reduce(
+    (counts, workout) => ({
+      ...counts,
+      [workout.difficulty]: (counts[workout.difficulty] || 0) + 1,
+    }),
+    { beginner: 0, intermediate: 0, advanced: 0 }
+  );
+  const athleteName = profile?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Athlete';
+
   if (loading) {
     return (
       <div className="page-state">
@@ -152,99 +172,146 @@ const Dashboard = () => {
 
   return (
     <section className="page page-dashboard">
-      <div className="dashboard-wrap" style={{ width: 'min(980px, 100%)', margin: '0 auto' }}>
-        
-        {/* Profile Header Widget */}
-        <Card style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white', border: 'none' }}>
-          <Card.Body className="dashboard-card-body">
-            <div>
-              <h2 style={{ margin: 0, color: 'white', fontSize: '2rem' }}>Welcome back, {profile?.name?.split(' ')[0] || 'Athlete'}!</h2>
-              <p style={{ margin: '0.5rem 0 0', opacity: 0.9 }}>Ready to crush your goals today?</p>
-            </div>
-            <div className="dashboard-card-actions">
-               <Button variant="ghost" style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }} onClick={logout} fullWidth>
-                Logout
-              </Button>
-            </div>
-          </Card.Body>
-        </Card>
+      <div className="dashboard-wrap">
+        <section className="dashboard-hero">
+          <div className="dashboard-hero__content">
+            <Badge color="primary">Dashboard</Badge>
+            <h1 className="dashboard-hero__title">Welcome back, {athleteName}.</h1>
+            <p className="dashboard-hero__text">
+              {profileLoading
+                ? 'Loading your athlete profile while your routines come into view.'
+                : 'Review your routines, start a live session, or build the next template in your training plan.'}
+            </p>
+          </div>
+          <div className="dashboard-hero__actions">
+            <Button as={Link} to="/workouts/create" variant="primary">
+              Create Routine
+            </Button>
+            <Button variant="ghost" onClick={logout}>
+              Logout
+            </Button>
+          </div>
+        </section>
 
         {profileError && <div className="alert alert-error">{profileError}</div>}
         {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
         {actionError && <div className="alert alert-error">{actionError}</div>}
 
-        {/* Workout List Section */}
-        <div className="dashboard-section-header">
-          <h3 style={{ margin: 0 }}>Your Routines</h3>
-          <Link to="/workouts/create" style={{ textDecoration: 'none' }}>
-            <Button variant="primary" fullWidth>+ Create Routine</Button>
-          </Link>
+        <div className="stats-grid" aria-label="Workout summary">
+          <article className="stat-card">
+            <p className="stat-card__label">Total routines</p>
+            <p className="stat-card__value">{totalRoutines}</p>
+            <p className="stat-card__hint">Loaded in this view</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-card__label">Total exercises</p>
+            <p className="stat-card__value">{totalExercises}</p>
+            <p className="stat-card__hint">Across loaded routines</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-card__label">Average duration</p>
+            <p className="stat-card__value">{averageDuration}m</p>
+            <p className="stat-card__hint">Based on routine duration</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-card__label">Difficulty mix</p>
+            <p className="stat-card__value">
+              {difficultyCounts.beginner}/{difficultyCounts.intermediate}/{difficultyCounts.advanced}
+            </p>
+            <p className="stat-card__hint">Beginner / Intermediate / Advanced</p>
+          </article>
+        </div>
+
+        <div className="dashboard-toolbar">
+          <div>
+            <h3>Your Routines</h3>
+            <p className="dashboard-subtext">Start, edit, or remove workout templates from your current routine list.</p>
+          </div>
+          <Button as={Link} to="/workouts/create" variant="primary">
+            Create Routine
+          </Button>
         </div>
 
         {workoutsLoading ? (
-          <p className="dashboard-subtext">Loading workouts...</p>
-        ) : workouts.length === 0 ? (
-          <Card style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(255,255,255,0.5)' }}>
+          <Card className="empty-state">
             <Card.Body>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏋️</div>
-              <h3 style={{ marginBottom: '0.5rem' }}>No routines yet</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-                Create your first workout routine to start tracking your progress and hitting PRs.
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p className="dashboard-subtext">Loading workouts...</p>
+            </Card.Body>
+          </Card>
+        ) : workouts.length === 0 ? (
+          <Card className="empty-state">
+            <Card.Body>
+              <div className="empty-state__mark" aria-hidden="true">W</div>
+              <h3>No routines yet</h3>
+              <p>
+                Create your first workout routine to start tracking exercises, sets, reps, and session notes.
               </p>
-              <Link to="/workouts/create" style={{ textDecoration: 'none' }}>
-                <Button variant="primary" size="lg">Create First Workout</Button>
-              </Link>
+              <Button as={Link} to="/workouts/create" variant="primary" size="lg">
+                Create First Workout
+              </Button>
             </Card.Body>
           </Card>
         ) : (
           <>
-            <div className="dashboard-grid">
+            <div className="workout-grid">
               {workouts.map((workout) => (
-                <Card key={workout._id} style={{ display: 'flex', flexDirection: 'column' }}>
-                  {workout.coverImage && (
+                <Card key={workout._id} className="workout-card">
+                  {workout.coverImage ? (
                     <img
                       src={workout.coverImage}
                       alt={workout.name}
-                      style={{
-                        width: '100%',
-                        height: '160px',
-                        objectFit: 'cover',
-                        borderTopLeftRadius: 'var(--radius-lg)',
-                        borderTopRightRadius: 'var(--radius-lg)'
-                      }}
+                      className="workout-card__image"
                     />
+                  ) : (
+                    <div className="workout-card__image-placeholder">Routine</div>
                   )}
                   
-                  <Card.Body style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                      <h4 style={{ margin: 0, fontSize: '1.25rem' }}>{workout.name}</h4>
-                      <Badge color={workout.difficulty === 'beginner' ? 'success' : workout.difficulty === 'intermediate' ? 'warning' : 'primary'}>
-                        {workout.difficulty}
+                  <Card.Body className="workout-card__body">
+                    <div className="workout-card__header">
+                      <h4 className="workout-card__title">{workout.name}</h4>
+                      <Badge color={getDifficultyColor(workout.difficulty)}>
+                        {workout.difficulty || 'Custom'}
                       </Badge>
                     </div>
 
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                      {workout.duration} min • {workout.exercises?.length || 0} exercises
-                    </p>
+                    <div className="workout-card__meta">
+                      <span>{workout.duration || 0} min</span>
+                      <span>{workout.exercises?.length || 0} exercises</span>
+                    </div>
 
-                    <ul style={{ margin: '0 0 1rem 0', padding: 0, listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', flex: 1 }}>
+                    {workout.notes && (
+                      <p className="workout-card__notes">{workout.notes}</p>
+                    )}
+
+                    <ul className="workout-card__exercise-list">
                       {(workout.exercises || []).slice(0, 3).map((exercise, index) => (
-                        <li key={index} style={{ marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          • {exercise.sets}x{exercise.reps} {exercise.name}
+                        <li key={index} className="workout-card__exercise">
+                          {exercise.sets}x{exercise.reps} {exercise.name}
                         </li>
                       ))}
-                      {(workout.exercises?.length > 3) && <li>• ...and more</li>}
+                      {workout.exercises?.length > 3 && (
+                        <li className="workout-card__exercise">and {workout.exercises.length - 3} more</li>
+                      )}
+                      {!workout.exercises?.length && (
+                        <li className="workout-card__exercise">No exercises added yet</li>
+                      )}
                     </ul>
 
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                      <Link to={`/workouts/session/${workout._id}`} style={{ flex: 2, textDecoration: 'none' }}>
-                        <Button variant="primary" fullWidth>Start Session</Button>
-                      </Link>
-                      <Link to={`/workouts/edit/${workout._id}`} style={{ flex: 1, textDecoration: 'none' }}>
-                        <Button variant="secondary" fullWidth>Edit</Button>
-                      </Link>
-                      <Button variant="danger" onClick={() => handleDeleteWorkout(workout._id)}>
-                         ✕
+                    <div className="workout-card__actions">
+                      <Button as={Link} to={`/workouts/session/${workout._id}`} variant="primary" fullWidth>
+                        Start
+                      </Button>
+                      <Button as={Link} to={`/workouts/edit/${workout._id}`} variant="secondary" fullWidth>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteWorkout(workout._id)}
+                        aria-label={`Delete ${workout.name}`}
+                        fullWidth
+                      >
+                        Delete
                       </Button>
                     </div>
                   </Card.Body>
@@ -258,18 +325,16 @@ const Dashboard = () => {
                   variant="ghost" 
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
-                  fullWidth
                 >
                   Previous
                 </Button>
-                <span style={{ color: 'var(--text-muted)' }}>
+                <span>
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <Button 
                   variant="ghost" 
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!pagination.hasNextPage}
-                  fullWidth
                 >
                   Next
                 </Button>

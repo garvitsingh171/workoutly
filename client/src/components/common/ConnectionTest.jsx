@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../../services/api';
+import Button from '../ui/Button';
 
 const ConnectionTest = () => {
   const [message, setMessage] = useState('');
@@ -38,13 +39,12 @@ const ConnectionTest = () => {
     <div className="connection-card">
       <h3 className="connection-title">Backend Connection Test</h3>
       
-      <button 
+      <Button
         onClick={testConnection} 
         disabled={loading}
-        className={loading ? 'btn btn-primary btn-disabled' : 'btn btn-primary'}
       >
         {loading ? 'Testing...' : 'Test Connection'}
-      </button>
+      </Button>
 
       {message && (
         <div className="alert alert-success">

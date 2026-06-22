@@ -6,6 +6,7 @@ import ImageUpload from "../components/ImageUpload";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
+import Badge from "../components/ui/Badge";
 
 const defaultExercise = {
   name: "",
@@ -129,20 +130,20 @@ const CreateWorkout = () => {
   };
 
   return (
-    <section className="page page-dashboard">
-      <div className="dashboard-wrap" style={{ width: 'min(800px, 100%)', margin: '0 auto', textAlign: 'left' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Create Template</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Build a reusable routine to track your sessions.</p>
-        </div>
+    <section className="page page-form">
+      <div className="form-page-wrap">
+        <header className="page-heading">
+          <Badge color="primary" className="page-heading__eyebrow">Template Builder</Badge>
+          <h1 className="page-heading__title">Create Template</h1>
+          <p className="page-heading__text">Build a reusable routine to track your sessions with clear exercises, duration, and difficulty.</p>
+        </header>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
+        <form onSubmit={handleSubmit} className="workout-form">
           <Card>
             <Card.Body>
-              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Workout Details</h3>
+              <h3 className="form-card__title">Workout Details</h3>
               
               <Input
                 label="Workout Name"
@@ -154,7 +155,7 @@ const CreateWorkout = () => {
                 required
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-grid form-grid--two">
                 <Input
                   label="Duration (minutes)"
                   name="duration"
@@ -182,7 +183,7 @@ const CreateWorkout = () => {
                 </div>
               </div>
 
-              <div className="ui-input-group" style={{ marginTop: '0.5rem' }}>
+              <div className="ui-input-group">
                 <label htmlFor="notes" className="ui-label">Notes (Optional)</label>
                 <textarea
                   id="notes"
@@ -200,25 +201,25 @@ const CreateWorkout = () => {
 
           <Card>
             <Card.Body>
-              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Cover Image</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+              <h3 className="form-card__title">Cover Image</h3>
+              <p className="form-card__text">
                 Add a visual cover for this workout template.
               </p>
               <ImageUpload onUpload={handleImageUpload} />
 
-              {isUploadingImage && <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Uploading image...</p>}
-              {uploadError && <div className="alert alert-error" style={{ marginTop: '1rem' }}>{uploadError}</div>}
+              {isUploadingImage && <p className="upload-status">Uploading image...</p>}
+              {uploadError && <div className="alert alert-error">{uploadError}</div>}
 
               {uploadedImage && (
-                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)' }}>
+                <div className="upload-summary">
                   <img
                     src={uploadedImage.url}
                     alt={uploadedImage.fileName}
-                    style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
+                    className="upload-summary__image"
                   />
                   <div>
-                    <p style={{ margin: 0, fontWeight: 600 }}>Upload complete</p>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{uploadedImage.fileName}</p>
+                    <p className="upload-summary__title">Upload complete</p>
+                    <p className="upload-summary__name">{uploadedImage.fileName}</p>
                   </div>
                 </div>
               )}
@@ -227,19 +228,20 @@ const CreateWorkout = () => {
 
           <Card>
             <Card.Body>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Exercises</h3>
+              <div className="form-section-header">
+                <h3>Exercises</h3>
                 <Button type="button" variant="ghost" size="sm" onClick={handleAddExercise}>
-                  + Add Exercise
+                  Add Exercise
                 </Button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="exercise-list">
                 {formData.exercises.map((exercise, index) => (
-                  <div key={`exercise-${index}`} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', alignItems: 'end', background: 'var(--bg)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
-                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Name</label>
+                  <div key={`exercise-${index}`} className="workout-exercise-row">
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-name-${index}`}>Name</label>
                       <input
+                        id={`exercise-name-${index}`}
                         className="ui-input"
                         type="text"
                         value={exercise.name}
@@ -248,9 +250,10 @@ const CreateWorkout = () => {
                         required
                       />
                     </div>
-                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
-                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Sets</label>
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-sets-${index}`}>Sets</label>
                       <input
+                        id={`exercise-sets-${index}`}
                         className="ui-input"
                         type="number"
                         min="1"
@@ -260,9 +263,10 @@ const CreateWorkout = () => {
                         required
                       />
                     </div>
-                    <div className="ui-input-group" style={{ marginBottom: 0 }}>
-                      <label className="ui-label" style={{ fontSize: '0.75rem' }}>Reps</label>
+                    <div className="ui-input-group ui-input-group--compact">
+                      <label className="ui-label" htmlFor={`exercise-reps-${index}`}>Reps</label>
                       <input
+                        id={`exercise-reps-${index}`}
                         className="ui-input"
                         type="number"
                         min="1"
@@ -275,11 +279,12 @@ const CreateWorkout = () => {
                     <Button
                       type="button"
                       variant="ghost"
-                      style={{ color: 'var(--danger)', padding: '0.75rem' }}
+                      className="workout-exercise-row__remove"
                       onClick={() => handleRemoveExercise(index)}
                       disabled={formData.exercises.length === 1}
+                      aria-label={`Remove exercise ${index + 1}`}
                     >
-                      ✕
+                      Remove
                     </Button>
                   </div>
                 ))}
@@ -287,7 +292,7 @@ const CreateWorkout = () => {
             </Card.Body>
           </Card>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+          <div className="form-actions">
             <Button type="button" variant="ghost" onClick={() => navigate("/dashboard")}>
               Cancel
             </Button>
