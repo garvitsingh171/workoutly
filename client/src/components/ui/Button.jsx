@@ -1,14 +1,14 @@
 import './ui.css';
 
-const Button = ({ 
+const Button = ({
   as: Component = 'button',
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  fullWidth = false, 
-  className = '', 
+  children,
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  className = '',
   type,
-  ...props 
+  ...props
 }) => {
   const baseClass = 'ui-btn';
   const variantClass = `ui-btn--${variant}`;

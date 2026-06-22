@@ -42,7 +42,7 @@
 
 .ui-btn:disabled,
 .ui-btn[aria-disabled='true'] {
-  opacity: 0.55;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -71,49 +71,52 @@
 }
 
 .ui-btn--primary {
-  background: linear-gradient(135deg, var(--primary), #ff8f3f);
-  color: #120906;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
   box-shadow: var(--shadow-primary);
 }
 
 .ui-btn--primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-hover), #ffad66);
+  background: var(--button-primary-bg-hover);
+  color: var(--button-primary-text);
   transform: translateY(-1px);
   box-shadow: 0 18px 36px rgba(var(--primary-rgb), 0.3);
 }
 
 .ui-btn--secondary {
-  background: linear-gradient(180deg, var(--surface-3), var(--secondary));
+  background: var(--button-secondary-bg);
   border-color: var(--border);
-  color: var(--text-strong);
+  color: var(--button-secondary-text);
   box-shadow: var(--shadow-sm);
 }
 
 .ui-btn--secondary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #2d3b52, #1f2b3e);
+  background: var(--button-secondary-bg-hover);
   border-color: var(--border-strong);
+  color: var(--button-secondary-text);
   transform: translateY(-1px);
 }
 
 .ui-btn--danger {
-  background: linear-gradient(135deg, #f43f5e, var(--danger));
-  color: #fff7f8;
-  box-shadow: 0 14px 28px rgba(251, 113, 133, 0.22);
+  background: var(--button-danger-bg);
+  color: var(--button-danger-text);
+  box-shadow: 0 14px 28px rgba(var(--danger-rgb), 0.22);
 }
 
 .ui-btn--danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #fb7185, #fda4af);
+  background: var(--button-danger-bg-hover);
+  color: var(--button-danger-text);
   transform: translateY(-1px);
 }
 
 .ui-btn--ghost {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--button-ghost-bg);
   border-color: var(--border);
   color: var(--text);
 }
 
 .ui-btn--ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--button-ghost-bg-hover);
   border-color: var(--border-strong);
   color: var(--text-strong);
   transform: translateY(-1px);
@@ -143,7 +146,7 @@
   padding: 0.72rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: rgba(7, 11, 18, 0.64);
+  background: var(--field-bg);
   color: var(--text-strong);
   font-family: var(--font-body);
   font-size: 0.95rem;
@@ -160,22 +163,22 @@
 
 .ui-input:focus {
   border-color: rgba(var(--primary-rgb), 0.72);
-  background: rgba(7, 11, 18, 0.88);
+  background: var(--field-bg-focus);
   box-shadow: var(--focus-ring);
 }
 
 .ui-input:disabled {
   color: var(--text-faint);
-  background: rgba(17, 24, 39, 0.42);
+  background: var(--field-bg-disabled);
   cursor: not-allowed;
 }
 
 .ui-input--error {
-  border-color: rgba(251, 113, 133, 0.75);
+  border-color: rgba(var(--danger-rgb), 0.75);
 }
 
 .ui-input--error:focus {
-  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.28);
+  box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.26);
 }
 
 textarea.ui-input {
@@ -205,7 +208,7 @@ select.ui-input {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+    var(--surface-gradient),
     var(--surface);
   box-shadow: var(--shadow-card);
 }
@@ -213,7 +216,7 @@ select.ui-input {
 .ui-card__header {
   padding: var(--space-5);
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--subtle-panel);
 }
 
 .ui-card__body {
@@ -224,7 +227,7 @@ select.ui-input {
 .ui-card__footer {
   padding: var(--space-5);
   border-top: 1px solid var(--border);
-  background: rgba(7, 11, 18, 0.34);
+  background: var(--row-bg);
 }
 
 /* Badge */
@@ -245,38 +248,38 @@ select.ui-input {
 }
 
 .ui-badge--neutral {
-  background: rgba(148, 163, 184, 0.12);
-  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(var(--accent-rgb), 0.11);
+  border-color: rgba(var(--accent-rgb), 0.2);
   color: var(--text);
 }
 
 .ui-badge--success {
   background: var(--success-soft);
-  border-color: rgba(52, 211, 153, 0.28);
+  border-color: rgba(var(--success-rgb), 0.26);
   color: var(--success);
 }
 
 .ui-badge--warning {
   background: var(--warning-soft);
-  border-color: rgba(251, 191, 36, 0.28);
+  border-color: rgba(var(--warning-rgb), 0.26);
   color: var(--warning);
 }
 
 .ui-badge--primary {
-  background: var(--primary-soft);
-  border-color: rgba(var(--primary-rgb), 0.3);
+  background: var(--primary-light);
+  border-color: rgba(var(--primary-rgb), 0.28);
   color: var(--primary-hover);
 }
 
 .ui-badge--danger {
   background: var(--danger-soft);
-  border-color: rgba(251, 113, 133, 0.3);
+  border-color: rgba(var(--danger-rgb), 0.28);
   color: var(--danger);
 }
 
 .ui-badge--accent {
   background: var(--accent-soft);
-  border-color: rgba(199, 244, 88, 0.3);
+  border-color: rgba(var(--accent-rgb), 0.28);
   color: var(--accent);
 }
 

@@ -18,7 +18,7 @@ const ConnectionTest = () => {
       const response = await api.get('/api/health', { timeout: 30000 });
       const data = response.data;
       setMessage(data.message);
-      
+
     } catch (err) {
       const isNetworkError = err?.message === 'Network Error';
       const isTimeoutError = err?.code === 'ECONNABORTED' || /timeout/i.test(err?.message || '');
@@ -38,9 +38,9 @@ const ConnectionTest = () => {
   return (
     <div className="connection-card">
       <h3 className="connection-title">Backend Connection Test</h3>
-      
+
       <Button
-        onClick={testConnection} 
+        onClick={testConnection}
         disabled={loading}
       >
         {loading ? 'Testing...' : 'Test Connection'}

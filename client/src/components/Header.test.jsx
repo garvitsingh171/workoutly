@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Header from './Header';
+import { ThemeProvider } from '../context/ThemeContext';
 
 const mockLogout = jest.fn();
 const mockUseAuth = jest.fn();
@@ -13,7 +14,9 @@ jest.mock('../context/AuthContext', () => ({
 const renderHeader = () => {
   render(
     <MemoryRouter>
-      <Header />
+      <ThemeProvider>
+        <Header />
+      </ThemeProvider>
     </MemoryRouter>
   );
 };

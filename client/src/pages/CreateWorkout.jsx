@@ -144,7 +144,7 @@ const CreateWorkout = () => {
           <Card>
             <Card.Body>
               <h3 className="form-card__title">Workout Details</h3>
-              
+
               <Input
                 label="Workout Name"
                 name="name"
