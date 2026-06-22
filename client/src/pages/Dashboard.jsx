@@ -62,7 +62,7 @@ const Dashboard = () => {
       socket.disconnect();
     };
   }, []);
-  
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?._id) {
@@ -266,7 +266,7 @@ const Dashboard = () => {
                   ) : (
                     <div className="workout-card__image-placeholder">Routine</div>
                   )}
-                  
+
                   <Card.Body className="workout-card__body">
                     <div className="workout-card__header">
                       <h4 className="workout-card__title">{workout.name}</h4>
@@ -321,8 +321,8 @@ const Dashboard = () => {
 
             {pagination.totalPages > 1 && (
               <div className="dashboard-pagination">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
                 >
@@ -331,8 +331,8 @@ const Dashboard = () => {
                 <span>
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!pagination.hasNextPage}
                 >

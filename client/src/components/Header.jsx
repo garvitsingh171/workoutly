@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './ui/Button';
+import ThemeToggle from './common/ThemeToggle';
 
 const Header = () => {
   const { isAuthenticated, logout, user } = useAuth();
@@ -20,6 +21,7 @@ const Header = () => {
           <>
             <Link to="/dashboard" className="site-header__link">Dashboard</Link>
             {firstName && <span className="site-header__user-text">Hi, {firstName}</span>}
+            <ThemeToggle />
             <button onClick={logout} className="site-header__logout-btn">
               Logout
             </button>
@@ -27,6 +29,7 @@ const Header = () => {
         ) : (
           <>
             <Link to="/login" className="site-header__link">Login</Link>
+            <ThemeToggle />
             <Button as={Link} to="/register" variant="primary" size="sm">
               Register
             </Button>

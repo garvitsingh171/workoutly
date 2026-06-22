@@ -1,14 +1,14 @@
 import { forwardRef, useId } from 'react';
 import './ui.css';
 
-const Input = forwardRef(({ 
-  label, 
-  error, 
-  className = '', 
+const Input = forwardRef(({
+  label,
+  error,
+  className = '',
   groupClassName = '',
-  id, 
+  id,
   describedBy,
-  ...props 
+  ...props
 }, ref) => {
   const generatedId = useId();
   const inputId = id || `input-${generatedId}`;
