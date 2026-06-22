@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Button from "./ui/Button";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE_IN_BYTES = 5 * 1024 * 1024;
@@ -102,8 +103,8 @@ const ImageUpload = ({ onUpload }) => {
 
   return (
     <form className="image-upload" onSubmit={handleSubmit}>
-      <div className="form-field">
-        <label htmlFor="workoutImage" className="form-label">
+      <div className="ui-input-group ui-input-group--compact">
+        <label htmlFor="workoutImage" className="ui-label">
           Workout Image
         </label>
         <input
@@ -112,7 +113,7 @@ const ImageUpload = ({ onUpload }) => {
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
           onChange={handleFileChange}
-          className="form-input"
+          className="ui-input"
         />
       </div>
 
@@ -129,13 +130,13 @@ const ImageUpload = ({ onUpload }) => {
         </div>
       ) : null}
 
-      <button
+      <Button
         type="submit"
-        className="btn btn-primary"
+        variant="primary"
         disabled={!selectedFile || Boolean(error) || isUploading}
       >
         {isUploading ? "Uploading..." : "Upload Image"}
-      </button>
+      </Button>
     </form>
   );
 };

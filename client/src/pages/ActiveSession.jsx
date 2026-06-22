@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api, { getErrorMessage } from '../services/api';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import api, { getErrorMessage } from '../services/api';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -20,16 +20,14 @@ const ActiveSession = () => {
     const fetchWorkout = async () => {
       try {
         const response = await api.get(`/api/workouts/${id}`);
-        const w = response.data.data;
-        setWorkout(w);
-        
-        // Initialize session data with unchecked state
-        const initialSession = w.exercises.map(ex => ({
-          ...ex,
-          setLogs: Array(ex.sets).fill({ completed: false, weight: '', reps: ex.reps })
+        const fetchedWorkout = response.data.data;
+        setWorkout(fetchedWorkout);
+
+        const initialSession = fetchedWorkout.exercises.map((exercise) => ({
+          ...exercise,
+          setLogs: Array(exercise.sets).fill({ completed: false, weight: '', reps: exercise.reps }),
         }));
         setSessionData(initialSession);
-
       } catch (error) {
         toast.error(getErrorMessage(error, 'Failed to load workout.'));
         navigate('/dashboard');
@@ -37,56 +35,25 @@ const ActiveSession = () => {
         setLoading(false);
       }
     };
+
     fetchWorkout();
-    
+
     return () => clearInterval(timerRef.current);
   }, [id, navigate]);
-
-  const toggleSet = (exIndex, setIndex) => {
-    setSessionData(prev => {
-      const newData = [...prev];
-      const currentLog = newData[exIndex].setLogs[setIndex];
-      const isCompleting = !currentLog.completed;
-      
-      newData[exIndex].setLogs[setIndex] = {
-        ...currentLog,
-        completed: isCompleting
-      };
-
-      if (isCompleting) {
-        startRestTimer(90); // 90 seconds default rest
-      } else {
-        stopRestTimer();
-      }
-
-      return newData;
-    });
-  };
-
-  const handleLogChange = (exIndex, setIndex, field, value) => {
-    setSessionData(prev => {
-      const newData = [...prev];
-      newData[exIndex].setLogs[setIndex] = {
-        ...newData[exIndex].setLogs[setIndex],
-        [field]: value
-      };
-      return newData;
-    });
-  };
 
   const startRestTimer = (seconds) => {
     clearInterval(timerRef.current);
     setRestTimer(seconds);
     setIsResting(true);
-    
+
     timerRef.current = setInterval(() => {
-      setRestTimer(prev => {
+      setRestTimer((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           setIsResting(false);
-          // Optional: trigger sound here
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
@@ -98,86 +65,140 @@ const ActiveSession = () => {
     setRestTimer(0);
   };
 
+  const toggleSet = (exIndex, setIndex) => {
+    setSessionData((prev) => {
+      const newData = [...prev];
+      const currentLog = newData[exIndex].setLogs[setIndex];
+      const isCompleting = !currentLog.completed;
+
+      newData[exIndex].setLogs[setIndex] = {
+        ...currentLog,
+        completed: isCompleting,
+      };
+
+      if (isCompleting) {
+        startRestTimer(90);
+      } else {
+        stopRestTimer();
+      }
+
+      return newData;
+    });
+  };
+
+  const handleLogChange = (exIndex, setIndex, field, value) => {
+    setSessionData((prev) => {
+      const newData = [...prev];
+      newData[exIndex].setLogs[setIndex] = {
+        ...newData[exIndex].setLogs[setIndex],
+        [field]: value,
+      };
+      return newData;
+    });
+  };
+
   const finishWorkout = () => {
-    // TODO: Send sessionData to a new backend endpoint for history tracking
-    toast.success('Workout completed! Great job! 🎉');
+    // TODO: Send sessionData to a new backend endpoint for history tracking.
+    toast.success('Workout completed. Great job!');
     navigate('/dashboard');
   };
 
   const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
+    const minutes = Math.floor(secs / 60);
+    const seconds = secs % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  if (loading) return <div className="page-state"><p>Loading session...</p></div>;
+  if (loading) {
+    return (
+      <div className="page-state">
+        <p>Loading session...</p>
+      </div>
+    );
+  }
+
   if (!workout) return null;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '100px' }}>
-      {/* Sticky Header */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--surface)', padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{workout.name}</h2>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Active Session</span>
+    <div className="active-session">
+      <header className="session-header">
+        <div className="session-header__inner">
+          <div>
+            <Badge color="accent">Active Session</Badge>
+            <h1>{workout.name}</h1>
+            <p className="session-header__meta">
+              {sessionData.length} exercises • {workout.duration || 0} minute routine
+            </p>
+          </div>
+          <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
+            Exit
+          </Button>
         </div>
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">Exit</Button>
-      </div>
+      </header>
 
-      <div style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-        {sessionData.map((ex, exIndex) => (
-          <Card key={exIndex} style={{ marginBottom: '1.5rem' }}>
-            <Card.Header style={{ background: 'linear-gradient(to right, rgba(255, 81, 0, 0.05), transparent)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.125rem' }}>{ex.name}</h3>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Target: {ex.sets} sets x {ex.reps} reps</p>
+      <main className="session-content">
+        {sessionData.map((exercise, exIndex) => (
+          <Card key={exIndex} className="session-exercise-card">
+            <Card.Header className="session-exercise-header">
+              <h2>{exercise.name}</h2>
+              <p>Target: {exercise.sets} sets x {exercise.reps} reps</p>
             </Card.Header>
-            <div style={{ padding: '0.5rem 1rem' }}>
-              {/* Header row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 60px', gap: '0.5rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                <div style={{ textAlign: 'center' }}>Set</div>
-                <div>Lbs/Kg</div>
+
+            <div className="session-set-list">
+              <div className="session-set-grid session-set-head" aria-hidden="true">
+                <div>Set</div>
+                <div>Weight</div>
                 <div>Reps</div>
-                <div style={{ textAlign: 'center' }}>Done</div>
+                <div>Done</div>
               </div>
-              
-              {/* Set rows */}
-              {ex.setLogs.map((log, setIndex) => (
-                <div key={setIndex} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 60px', gap: '0.5rem', padding: '0.5rem 0', alignItems: 'center', background: log.completed ? 'rgba(16, 185, 129, 0.05)' : 'transparent', transition: 'background 0.2s' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 600, color: log.completed ? 'var(--success)' : 'var(--text-muted)' }}>
-                    {setIndex + 1}
-                  </div>
+
+              {exercise.setLogs.map((log, setIndex) => (
+                <div
+                  key={setIndex}
+                  className={`session-set-grid session-set-row ${log.completed ? 'session-set-row--completed' : ''}`.trim()}
+                >
+                  <div className="session-set-number">{setIndex + 1}</div>
+
                   <div>
-                    <input 
-                      type="number" 
-                      placeholder="-" 
+                    <label className="sr-only" htmlFor={`weight-${exIndex}-${setIndex}`}>
+                      {exercise.name} set {setIndex + 1} weight
+                    </label>
+                    <input
+                      id={`weight-${exIndex}-${setIndex}`}
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="-"
                       value={log.weight}
-                      onChange={(e) => handleLogChange(exIndex, setIndex, 'weight', e.target.value)}
+                      onChange={(event) => handleLogChange(exIndex, setIndex, 'weight', event.target.value)}
                       disabled={log.completed}
-                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textAlign: 'center', background: log.completed ? 'transparent' : 'var(--surface)' }}
+                      className="session-input"
                     />
                   </div>
+
                   <div>
-                    <input 
-                      type="number" 
+                    <label className="sr-only" htmlFor={`reps-${exIndex}-${setIndex}`}>
+                      {exercise.name} set {setIndex + 1} reps
+                    </label>
+                    <input
+                      id={`reps-${exIndex}-${setIndex}`}
+                      type="number"
+                      inputMode="numeric"
                       value={log.reps}
-                      onChange={(e) => handleLogChange(exIndex, setIndex, 'reps', e.target.value)}
+                      onChange={(event) => handleLogChange(exIndex, setIndex, 'reps', event.target.value)}
                       disabled={log.completed}
-                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textAlign: 'center', background: log.completed ? 'transparent' : 'var(--surface)' }}
+                      className="session-input"
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <button 
+
+                  <div>
+                    <button
+                      type="button"
                       onClick={() => toggleSet(exIndex, setIndex)}
-                      style={{ 
-                        width: '36px', height: '36px', borderRadius: '8px', 
-                        background: log.completed ? 'var(--success)' : 'var(--surface)', 
-                        border: `2px solid ${log.completed ? 'var(--success)' : 'var(--border)'}`,
-                        color: log.completed ? 'white' : 'transparent',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all 0.2s'
-                      }}
+                      className={`session-complete-btn ${log.completed ? 'session-complete-btn--done' : ''}`.trim()}
+                      aria-pressed={log.completed}
+                      aria-label={`${log.completed ? 'Mark incomplete' : 'Mark complete'}: ${exercise.name} set ${setIndex + 1}`}
                     >
-                      {log.completed && '✓'}
+                      {log.completed ? 'Done' : 'Mark'}
                     </button>
                   </div>
                 </div>
@@ -185,21 +206,20 @@ const ActiveSession = () => {
             </div>
           </Card>
         ))}
-      </div>
+      </main>
 
-      {/* Floating Rest Timer */}
       {isResting && (
-        <div style={{ position: 'fixed', bottom: '90px', left: '50%', transform: 'translateX(-50%)', background: 'var(--surface)', borderRadius: 'var(--radius-full)', padding: '0.5rem 1.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 50, border: '1px solid var(--primary)' }}>
-          <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem', fontVariantNumeric: 'tabular-nums' }}>
-            ⏱ {formatTime(restTimer)}
-          </div>
-          <button onClick={stopRestTimer} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.875rem' }}>Skip</button>
+        <div className="rest-timer" role="status" aria-live="polite">
+          <span className="rest-timer__label">Rest</span>
+          <strong className="rest-timer__time">{formatTime(restTimer)}</strong>
+          <button type="button" onClick={stopRestTimer} className="rest-timer__skip">
+            Skip
+          </button>
         </div>
       )}
 
-      {/* Sticky Bottom Actions */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--surface)', padding: '1rem', borderTop: '1px solid var(--border)', boxShadow: '0 -4px 20px rgba(0,0,0,0.05)', zIndex: 40 }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div className="session-finish-bar">
+        <div className="session-finish-bar__inner">
           <Button variant="primary" fullWidth size="lg" onClick={finishWorkout}>
             Finish Workout
           </Button>

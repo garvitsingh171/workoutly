@@ -4,5 +4,8 @@ module.exports = {
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
+  moduleNameMapper: {
+    '\\.(css)$': 'identity-obj-proxy',
+  },
   moduleFileExtensions: ['js', 'jsx'],
 };
