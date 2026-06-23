@@ -15,6 +15,7 @@ export const getErrorMessage = (error, fallbackMessage = 'Something went wrong. 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000',
   timeout: 30000,
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
@@ -32,8 +33,38 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const originalRequest = error.config || {};
+    const requestUrl = originalRequest.url || '';
+    const isAuthEndpoint = [
+      '/api/auth/login',
+      '/api/auth/register',
+      '/api/users/register',
+      '/api/auth/refresh',
+      '/api/auth/logout',
+    ].includes(requestUrl);
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshResponse = await api.post('/api/auth/refresh');
+        const { token, user } = refreshResponse.data;
+
+        if (token && user) {
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+
+          return api(originalRequest);
+        }
+      } catch {
+        // Fall through to the normal logout cleanup below.
+      }
+    }
+
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 

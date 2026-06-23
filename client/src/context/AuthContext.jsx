@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -41,31 +42,57 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const storedUser = localStorage.getItem(USER_KEY);
+    const loadAuth = async () => {
+      const storedToken = localStorage.getItem(TOKEN_KEY);
+      const storedUser = localStorage.getItem(USER_KEY);
 
-    if (!storedToken || !storedUser) {
-      setLoading(false);
-      return;
-    }
+      if (!storedToken || !storedUser) {
+        setLoading(false);
+        return;
+      }
 
-    if (isTokenExpired(storedToken)) {
-      clearStoredAuth();
-      setLoading(false);
-      return;
-    }
+      if (!isTokenExpired(storedToken)) {
+        try {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        } catch {
+          clearStoredAuth();
+        } finally {
+          setLoading(false);
+        }
 
-    try {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    } catch {
-      clearStoredAuth();
-    } finally {
-      setLoading(false);
-    }
+        return;
+      }
+
+      try {
+        const response = await api.post('/api/auth/refresh');
+        const { token: refreshedToken, user: refreshedUser } = response.data;
+
+        if (refreshedToken && refreshedUser) {
+          setToken(refreshedToken);
+          setUser(refreshedUser);
+          localStorage.setItem(TOKEN_KEY, refreshedToken);
+          localStorage.setItem(USER_KEY, JSON.stringify(refreshedUser));
+        } else {
+          clearStoredAuth();
+        }
+      } catch {
+        clearStoredAuth();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAuth();
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch {
+      // Local logout should still happen even if the server is unreachable.
+    }
+
     setUser(null);
     setToken(null);
     clearStoredAuth();

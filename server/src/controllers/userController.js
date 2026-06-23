@@ -1,95 +1,16 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const AppError = require('../utils/AppError');
-
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d',
-  });
-};
-
-// @desc    Register a new user
-// @route   POST /api/users/register
-// @access  Public
-const registerUser = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
-    const normalizedEmail = String(email || '').trim().toLowerCase();
-
-    if (!name || !email || !password) {
-      return next(new AppError('Please add all fields', 400));
-    }
-
-    // Check if user exists
-    const userExists = await User.findOne({ email: normalizedEmail });
-
-    if (userExists) {
-      return next(new AppError('User already exists', 400));
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
-    const user = await User.create({
-      name,
-      email: normalizedEmail,
-      password: hashedPassword
-    });
-
-    if (user) {
-      const token = generateToken(user._id);
-
-      const userResponse = {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
-
-      return res.status(201).json({
-        success: true,
-        message: 'Registration successful',
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        token,
-        user: userResponse,
-      });
-    }
-
-    return next(new AppError('Invalid user data', 400));
-  } catch (error) {
-    return next(error);
-  }
-};
+const { registerUser } = require('./authController');
+const userService = require('../services/userService');
+const { sendSuccess } = require('../utils/apiResponse');
 
 // @desc    Get a user by ID
 // @route   GET /api/users/:id
 // @access  Private
 const getUserById = async (req, res, next) => {
   try {
-    if (req.user && req.params.id !== String(req.user._id)) {
-      return next(new AppError('You can only view your own profile', 403));
-    }
+    const user = await userService.getUserById(req.params.id, req.user._id);
 
-    const user = await User.findById(req.params.id);
-
-    if (user) {
-      return res.status(200).json({
-        success: true,
-        data: user,
-      });
-    }
-
-    return next(new AppError('User not found', 404));
+    return sendSuccess(res, 200, 'User fetched successfully', user);
   } catch (error) {
-    if (error.kind === 'ObjectId') {
-      return next(new AppError('User not found', 404));
-    }
     return next(error);
   }
 };
@@ -99,36 +20,18 @@ const getUserById = async (req, res, next) => {
 // @access  Private
 const updateUser = async (req, res, next) => {
   try {
-    if (req.user && req.params.id !== String(req.user._id)) {
-      return next(new AppError('You can only update your own profile', 403));
-    }
+    const updatedUser = await userService.updateUser(req.params.id, req.user._id, req.body);
 
-    const user = await User.findById(req.params.id);
-
-    if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-
-      if (req.body.password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(req.body.password, salt);
-      }
-
-      const updatedUser = await user.save();
-
-      return res.status(200).json({
-        success: true,
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-      });
-    }
-
-    return next(new AppError('User not found', 404));
+    return sendSuccess(res, 200, 'User updated successfully', {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    }, {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    });
   } catch (error) {
-    if (error.kind === 'ObjectId') {
-      return next(new AppError('User not found', 404));
-    }
     return next(error);
   }
 };
@@ -138,25 +41,10 @@ const updateUser = async (req, res, next) => {
 // @access  Private
 const deleteUser = async (req, res, next) => {
   try {
-    if (req.user && req.params.id !== String(req.user._id)) {
-      return next(new AppError('You can only delete your own profile', 403));
-    }
+    await userService.deleteUser(req.params.id, req.user._id);
 
-    const user = await User.findById(req.params.id);
-
-    if (user) {
-      await User.deleteOne({ _id: user._id });
-      return res.status(200).json({
-        success: true,
-        message: 'User removed',
-      });
-    }
-
-    return next(new AppError('User not found', 404));
+    return sendSuccess(res, 200, 'User removed');
   } catch (error) {
-    if (error.kind === 'ObjectId') {
-      return next(new AppError('User not found', 404));
-    }
     return next(error);
   }
 };
