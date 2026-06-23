@@ -1,15 +1,15 @@
 # Production Environment Variables
 
--## Required for Server
+## Required for Server
 
 - `MONGO_URI` - MongoDB Atlas production connection string. Example:
-  `mongodb+srv://prod-admin:YOUR_PASSWORD@cluster0.abcde.mongodb.net/creator-platform-prod?retryWrites=true&w=majority`
+  `mongodb+srv://prod-admin:YOUR_PASSWORD@cluster0.abcde.mongodb.net/workoutly-prod?retryWrites=true&w=majority`
 - `JWT_SECRET` - Strong random secret (minimum 32 characters)
 - `NODE_ENV` - Set to `production`
 - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
 - `CLOUDINARY_API_KEY` - Your Cloudinary API key
 - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
-- `FRONTEND_URL` - URL of deployed frontend (e.g., https://yourapp.vercel.app)
+- `CLIENT_URL` - URL of deployed frontend (e.g., https://yourapp.vercel.app)
 
 ## Required for Client
 
@@ -24,7 +24,7 @@ Use the backend URL (no trailing slash) so the client can call the API endpoints
 
 - Never commit these values to Git.
 - Store secrets in your deployment platform's environment settings (Render, Vercel, etc.).
-- `DATABASE_URL` contains the database password — treat as highly sensitive.
+- `MONGO_URI` contains the database password, so treat it as highly sensitive.
 
 ## Local files
 
@@ -32,7 +32,7 @@ Use the backend URL (no trailing slash) so the client can call the API endpoints
 
 ## Quick checklist
 
-- Create production DB: `creator-platform-prod`
+- Create production DB: `workoutly-prod`
 - Create production DB user: `prod-admin` (save generated password)
 - Add IP access: `0.0.0.0/0` (for cloud deployments; less secure)
 - Copy connection string and replace `<password>` placeholder
@@ -41,13 +41,13 @@ Use the backend URL (no trailing slash) so the client can call the API endpoints
 ## Example `server/.env.production`
 
 ```
-MONGO_URI=mongodb+srv://prod-admin:YOUR_PASSWORD@cluster0.abcde.mongodb.net/creator-platform-prod?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://prod-admin:YOUR_PASSWORD@cluster0.abcde.mongodb.net/workoutly-prod?retryWrites=true&w=majority
 NODE_ENV=production
 JWT_SECRET=your-strong-jwt-secret
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-FRONTEND_URL=
+CLIENT_URL=
 ```
 
 Keep this document updated when adding new environment variables required by the app.

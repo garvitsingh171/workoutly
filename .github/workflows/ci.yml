@@ -11,27 +11,50 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install server dependencies
-        run: |
-          cd server
-          npm ci
+        working-directory: server
+        run: npm ci
 
-      - name: Skip server tests temporarily
-        run: echo "Skipping backend tests"
+      - name: Run server tests
+        working-directory: server
+        env:
+          MONGO_URI_TEST: mongodb://127.0.0.1:27017/workoutly_test
+          JWT_SECRET: test-jwt-secret-12345678901234567890
+          JWT_EXPIRE: 7d
+        run: npm test
 
       - name: Install client dependencies
-        run: |
-          cd client
-          npm ci
+        working-directory: client
+        run: npm ci
 
-      - name: Skip frontend tests temporarily
-        run: echo "Skipping frontend tests"
+      - name: Run client lint
+        working-directory: client
+        run: npm run lint
+
+      - name: Run client tests
+        working-directory: client
+        run: npm test -- --runInBand
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
