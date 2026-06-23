@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
-const jwt = require('jsonwebtoken');
 const connectDB = require('./src/config/db');
 const User = require('./src/models/User');
+const { verifyAccessToken } = require('./src/utils/token');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
@@ -48,7 +48,7 @@ io.use(async (socket, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAccessToken(token);
     const user = await User.findById(decoded.userId).select('_id name email');
 
     if (!user) {

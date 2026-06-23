@@ -40,7 +40,9 @@ Required placeholders:
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-JWT_EXPIRE=7d
+JWT_EXPIRE=15m
+JWT_REFRESH_SECRET=your_refresh_jwt_secret
+JWT_REFRESH_EXPIRE=7d
 CLIENT_URL=http://localhost:5173
 
 1. client/.env
@@ -91,13 +93,18 @@ Client runs on [http://localhost:5173](http://localhost:5173) and server runs on
 ## API Overview
 
 - POST /api/users/register -> register user
-- POST /api/auth/login -> login user and return JWT
+- POST /api/auth/register -> register user
+- POST /api/auth/login -> login user, return access token, and set httpOnly refresh-token cookie
+- POST /api/auth/refresh -> issue a new access token from the refresh-token cookie
+- POST /api/auth/logout -> clear the refresh-token cookie
 - GET /api/users/:id -> get current user profile (protected)
 - POST /api/workouts -> create workout (protected)
 - GET /api/workouts?page=1&limit=10 -> list workouts with pagination (protected)
 - GET /api/workouts/:id -> get one workout (protected + ownership)
 - PUT /api/workouts/:id -> update workout (protected + ownership)
 - DELETE /api/workouts/:id -> delete workout (protected + ownership)
+
+Access tokens are still sent by the frontend in the Authorization header. The refresh token is stored by the browser as an httpOnly cookie named refreshToken and is not exposed in localStorage.
 
 ## Error Handling Contract
 
@@ -122,8 +129,10 @@ Use this sequence to verify end-to-end behavior:
 6. View paginated workouts
 7. Edit owned workout
 8. Delete owned workout
-9. Trigger unauthorized access and verify clear error
-10. Logout and confirm protected routes are blocked
+9. Refresh the page after login and confirm the session is restored
+10. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
+11. Trigger unauthorized access and verify clear error
+12. Logout and confirm protected routes are blocked
 
 ## Submission Notes
 
