@@ -10,11 +10,6 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use((req, res, next) => {
-	req.io = req.app?.locals?.io || req.io || { emit: () => {} };
-	next();
-});
-
 router
 	.route('/')
 	.post(protect, createWorkout)

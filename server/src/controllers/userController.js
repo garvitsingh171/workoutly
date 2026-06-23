@@ -67,25 +67,9 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-// @desc    Get all users
-// @route   GET /api/users
-// @access  Public
-const getUsers = async (req, res, next) => {
-  try {
-    // Exclude passwords
-    const users = await User.find({});
-    return res.status(200).json({
-      success: true,
-      data: users,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 // @desc    Get a user by ID
 // @route   GET /api/users/:id
-// @access  Public
+// @access  Private
 const getUserById = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
@@ -112,7 +96,7 @@ const getUserById = async (req, res, next) => {
 
 // @desc    Update a user
 // @route   PUT /api/users/:id
-// @access  Public
+// @access  Private
 const updateUser = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
@@ -151,7 +135,7 @@ const updateUser = async (req, res, next) => {
 
 // @desc    Delete a user
 // @route   DELETE /api/users/:id
-// @access  Public
+// @access  Private
 const deleteUser = async (req, res, next) => {
   try {
     if (req.user && req.params.id !== String(req.user._id)) {
@@ -179,7 +163,6 @@ const deleteUser = async (req, res, next) => {
 
 module.exports = {
   registerUser,
-  getUsers,
   getUserById,
   updateUser,
   deleteUser,

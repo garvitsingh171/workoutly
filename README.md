@@ -41,13 +41,16 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=7d
-CLIENT_URL=[http://localhost:5173](http://localhost:5173)
+CLIENT_URL=http://localhost:5173
 
 1. client/.env
 
 Required placeholders:
 
-VITE_API_URL=[http://localhost:5000](http://localhost:5000)
+VITE_API_BASE_URL=http://localhost:5000
+VITE_SOCKET_URL=http://localhost:5000
+
+Use client/.env.example as the safe template for local client settings.
 
 ## Installation
 
@@ -148,25 +151,25 @@ docker login
 
 2. Tag images with your Docker Hub username
 
-docker tag creator-platform-client:latest your-dockerhub-username/creator-platform-client:latest
-docker tag creator-platform-server:latest your-dockerhub-username/creator-platform-server:latest
+docker tag workoutly-client:latest your-dockerhub-username/workoutly-client:latest
+docker tag workoutly-server:latest your-dockerhub-username/workoutly-server:latest
 
 3. Push images
 
-docker push your-dockerhub-username/creator-platform-client:latest
-docker push your-dockerhub-username/creator-platform-server:latest
+docker push your-dockerhub-username/workoutly-client:latest
+docker push your-dockerhub-username/workoutly-server:latest
 
 4. Verify pull
 
-docker rmi your-dockerhub-username/creator-platform-client:latest
-docker rmi your-dockerhub-username/creator-platform-server:latest
-docker pull your-dockerhub-username/creator-platform-client:latest
-docker pull your-dockerhub-username/creator-platform-server:latest
+docker rmi your-dockerhub-username/workoutly-client:latest
+docker rmi your-dockerhub-username/workoutly-server:latest
+docker pull your-dockerhub-username/workoutly-client:latest
+docker pull your-dockerhub-username/workoutly-server:latest
 
 Optional version tag:
 
-docker tag your-dockerhub-username/creator-platform-client:latest your-dockerhub-username/creator-platform-client:v1.0.0
-docker push your-dockerhub-username/creator-platform-client:v1.0.0
+docker tag your-dockerhub-username/workoutly-client:latest your-dockerhub-username/workoutly-client:v1.0.0
+docker push your-dockerhub-username/workoutly-client:v1.0.0
 
 ## Production Compose (Pull from Docker Hub)
 

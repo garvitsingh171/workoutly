@@ -11,19 +11,19 @@ process.env.MONGODB_URI_TEST = process.env.MONGODB_URI_TEST || process.env.MONGO
 const app = require('../app');
 const User = require('../src/models/User');
 
+beforeAll(async () => {
+  await mongoose.connect(process.env.MONGO_URI_TEST);
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
+
 describe('Auth Routes', () => {
-  beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URI_TEST);
-  });
-
-  afterEach(async () => {
-    await User.deleteMany({});
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
-
   test('should register a new user successfully', async () => {
     const res = await request(app).post('/api/auth/register').send({
       name: 'Test User',
@@ -98,4 +98,65 @@ describe('Auth Routes', () => {
   });
 });
 
-// Comment for testing CI pipeline after skipping tests temporarily
+describe('User Routes', () => {
+  const registerTestUser = async (email) => {
+    const res = await request(app).post('/api/auth/register').send({
+      name: 'Route Test User',
+      email,
+      password: 'password123',
+    });
+
+    return {
+      token: res.body.token,
+      userId: res.body.user._id,
+    };
+  };
+
+  test('should not allow authenticated users to list all users', async () => {
+    const user = await registerTestUser('list-blocked@example.com');
+
+    const res = await request(app)
+      .get('/api/users')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should allow users to view only their own profile', async () => {
+    const firstUser = await registerTestUser('owner@example.com');
+    const secondUser = await registerTestUser('other@example.com');
+
+    const ownProfile = await request(app)
+      .get(`/api/users/${firstUser.userId}`)
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(ownProfile.status).toBe(200);
+    expect(ownProfile.body.data).toHaveProperty('email', 'owner@example.com');
+
+    const otherProfile = await request(app)
+      .get(`/api/users/${secondUser.userId}`)
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(otherProfile.status).toBe(403);
+    expect(otherProfile.body).toHaveProperty('success', false);
+  });
+
+  test('should protect profile updates and deletes by ownership', async () => {
+    const firstUser = await registerTestUser('profile-owner@example.com');
+    const secondUser = await registerTestUser('profile-other@example.com');
+
+    const updateRes = await request(app)
+      .put(`/api/users/${secondUser.userId}`)
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send({ name: 'Unauthorized Update' });
+
+    expect(updateRes.status).toBe(403);
+
+    const deleteRes = await request(app)
+      .delete(`/api/users/${secondUser.userId}`)
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(deleteRes.status).toBe(403);
+  });
+});
