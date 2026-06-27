@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { AUTH_CLEARED_EVENT } from '../services/api';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -64,26 +64,22 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      try {
-        const response = await api.post('/api/auth/refresh');
-        const { token: refreshedToken, user: refreshedUser } = response.data;
-
-        if (refreshedToken && refreshedUser) {
-          setToken(refreshedToken);
-          setUser(refreshedUser);
-          localStorage.setItem(TOKEN_KEY, refreshedToken);
-          localStorage.setItem(USER_KEY, JSON.stringify(refreshedUser));
-        } else {
-          clearStoredAuth();
-        }
-      } catch {
-        clearStoredAuth();
-      } finally {
-        setLoading(false);
-      }
+      clearStoredAuth();
+      setLoading(false);
     };
 
     loadAuth();
+  }, []);
+
+  useEffect(() => {
+    const handleAuthCleared = () => {
+      setUser(null);
+      setToken(null);
+      clearStoredAuth();
+    };
+
+    window.addEventListener(AUTH_CLEARED_EVENT, handleAuthCleared);
+    return () => window.removeEventListener(AUTH_CLEARED_EVENT, handleAuthCleared);
   }, []);
 
   const logout = useCallback(async () => {
@@ -100,6 +96,10 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   const login = useCallback((userData, userToken) => {
+    if (!userData || !userToken) {
+      return { success: false, message: 'Login response was missing user or token data.' };
+    }
+
     if (isTokenExpired(userToken)) {
       logout();
       return { success: false, message: 'Session token is expired. Please login again.' };

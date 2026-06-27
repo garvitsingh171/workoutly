@@ -14,7 +14,10 @@ const ActiveSession = () => {
   const [sessionData, setSessionData] = useState([]);
   const [restTimer, setRestTimer] = useState(0);
   const [isResting, setIsResting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const timerRef = useRef(null);
+  const startedAtRef = useRef(new Date());
 
   useEffect(() => {
     const fetchWorkout = async () => {
@@ -22,10 +25,15 @@ const ActiveSession = () => {
         const response = await api.get(`/api/workouts/${id}`);
         const fetchedWorkout = response.data.data;
         setWorkout(fetchedWorkout);
+        startedAtRef.current = new Date();
 
         const initialSession = fetchedWorkout.exercises.map((exercise) => ({
           ...exercise,
-          setLogs: Array(exercise.sets).fill({ completed: false, weight: '', reps: exercise.reps }),
+          setLogs: Array.from({ length: exercise.sets }, () => ({
+            completed: false,
+            weight: '',
+            reps: exercise.reps,
+          })),
         }));
         setSessionData(initialSession);
       } catch (error) {
@@ -68,12 +76,17 @@ const ActiveSession = () => {
   const toggleSet = (exIndex, setIndex) => {
     setSessionData((prev) => {
       const newData = [...prev];
+      const setLogs = [...newData[exIndex].setLogs];
       const currentLog = newData[exIndex].setLogs[setIndex];
       const isCompleting = !currentLog.completed;
 
-      newData[exIndex].setLogs[setIndex] = {
+      setLogs[setIndex] = {
         ...currentLog,
         completed: isCompleting,
+      };
+      newData[exIndex] = {
+        ...newData[exIndex],
+        setLogs,
       };
 
       if (isCompleting) {
@@ -89,18 +102,58 @@ const ActiveSession = () => {
   const handleLogChange = (exIndex, setIndex, field, value) => {
     setSessionData((prev) => {
       const newData = [...prev];
-      newData[exIndex].setLogs[setIndex] = {
+      const setLogs = [...newData[exIndex].setLogs];
+      setLogs[setIndex] = {
         ...newData[exIndex].setLogs[setIndex],
         [field]: value,
+      };
+      newData[exIndex] = {
+        ...newData[exIndex],
+        setLogs,
       };
       return newData;
     });
   };
 
-  const finishWorkout = () => {
-    // TODO: Send sessionData to a new backend endpoint for history tracking.
-    toast.success('Workout completed. Great job!');
-    navigate('/dashboard');
+  const finishWorkout = async () => {
+    setSaveError('');
+    setIsSaving(true);
+
+    const completedAt = new Date();
+    const durationMinutes = Math.max(
+      1,
+      Math.round((completedAt.getTime() - startedAtRef.current.getTime()) / 60000)
+    );
+
+    const payload = {
+      workout: workout._id,
+      workoutName: workout.name,
+      startedAt: startedAtRef.current.toISOString(),
+      completedAt: completedAt.toISOString(),
+      durationMinutes,
+      exercises: sessionData.map((exercise) => ({
+        name: exercise.name,
+        sets: exercise.setLogs.map((log, index) => ({
+          setNumber: index + 1,
+          targetReps: Number(exercise.reps) || 0,
+          actualReps: Number(log.reps) || 0,
+          weight: Number(log.weight) || 0,
+          completed: Boolean(log.completed),
+        })),
+      })),
+    };
+
+    try {
+      await api.post('/api/sessions', payload);
+      toast.success('Workout completed and saved. Great job!');
+      navigate('/dashboard');
+    } catch (error) {
+      const message = getErrorMessage(error, 'Failed to save workout session.');
+      setSaveError(message);
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const formatTime = (secs) => {
@@ -137,6 +190,8 @@ const ActiveSession = () => {
       </header>
 
       <main className="session-content">
+        {saveError && <div className="alert alert-error">{saveError}</div>}
+
         {sessionData.map((exercise, exIndex) => (
           <Card key={exIndex} className="session-exercise-card">
             <Card.Header className="session-exercise-header">
@@ -220,8 +275,8 @@ const ActiveSession = () => {
 
       <div className="session-finish-bar">
         <div className="session-finish-bar__inner">
-          <Button variant="primary" fullWidth size="lg" onClick={finishWorkout}>
-            Finish Workout
+          <Button variant="primary" fullWidth size="lg" onClick={finishWorkout} disabled={isSaving}>
+            {isSaving ? 'Saving Workout...' : 'Finish Workout'}
           </Button>
         </div>
       </div>
