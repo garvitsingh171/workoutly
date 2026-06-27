@@ -52,6 +52,26 @@ api.interceptors.response.use(
       '/api/auth/logout',
     ].includes(requestUrl);
 
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshResponse = await api.post('/api/auth/refresh');
+        const { token, user } = refreshResponse.data;
+
+        if (token && user) {
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+
+          return api(originalRequest);
+        }
+      } catch {
+        // Fall through to auth cleanup below.
+      }
+    }
+
     if (error.response?.status === 401 && !isAuthEndpoint) {
       clearAuthAndNotify();
 

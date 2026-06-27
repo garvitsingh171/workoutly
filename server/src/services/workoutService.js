@@ -46,6 +46,15 @@ const ensureWorkoutOwner = (workout, userId, action) => {
   }
 };
 
+const buildDuplicateWorkoutName = (workoutName) => {
+  const copySuffix = ' Copy';
+  const maxWorkoutNameLength = 100;
+  const baseName = String(workoutName || '').trim();
+  const maxBaseLength = maxWorkoutNameLength - copySuffix.length;
+
+  return `${baseName.slice(0, maxBaseLength)}${copySuffix}`;
+};
+
 const createWorkout = async (body, userId) => {
   const payload = buildWorkoutPayload(body);
 
@@ -138,7 +147,7 @@ const duplicateWorkout = async (workoutId, userId) => {
   ensureWorkoutOwner(workout, userId, 'duplicate');
 
   return workoutRepository.createWorkout({
-    name: `${workout.name} Copy`,
+    name: buildDuplicateWorkoutName(workout.name),
     exercises: workout.exercises.map((exercise) => ({
       name: exercise.name,
       sets: exercise.sets,

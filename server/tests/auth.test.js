@@ -410,6 +410,20 @@ describe('Workout Routes', () => {
     expect(res.body.data._id).not.toBe(createRes.body.data._id);
   });
 
+  test('should keep duplicated workout names within the max length', async () => {
+    const user = await registerTestUser('workout-duplicate-long@example.com');
+    const longWorkoutName = 'A'.repeat(100);
+    const createRes = await createWorkoutForUser(user, longWorkoutName);
+
+    const res = await request(app)
+      .post(`/api/workouts/${createRes.body.data._id}/duplicate`)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.name).toHaveLength(100);
+    expect(res.body.data.name.endsWith(' Copy')).toBe(true);
+  });
+
   test('should not duplicate another user workout', async () => {
     const firstUser = await registerTestUser('workout-duplicate-blocked@example.com');
     const secondUser = await registerTestUser('workout-duplicate-owner@example.com');
