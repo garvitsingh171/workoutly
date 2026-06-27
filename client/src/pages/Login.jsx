@@ -30,6 +30,11 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setApiError('');
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: '',
+    }));
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -54,6 +59,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
+    setErrors({});
 
     if (!validateForm()) return;
 
@@ -67,8 +73,10 @@ const Login = () => {
 
       const response = await api.post('/api/auth/login', loginPayload);
       const data = response.data;
+      const responseUser = data.user || data.data?.user;
+      const responseToken = data.token || data.data?.token;
 
-      const loginResult = login(data.user, data.token);
+      const loginResult = login(responseUser, responseToken);
 
       if (!loginResult.success) {
         const message = loginResult.message || 'Unable to login.';
@@ -77,6 +85,7 @@ const Login = () => {
         return;
       }
 
+      setApiError('');
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     } catch (error) {

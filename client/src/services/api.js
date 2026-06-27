@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+export const AUTH_CLEARED_EVENT = 'workoutly-auth-cleared';
+
 export const getErrorMessage = (error, fallbackMessage = 'Something went wrong. Please try again.') => {
   if (error?.response?.data?.message) {
     return error.response.data.message;
@@ -17,6 +19,12 @@ const api = axios.create({
   timeout: 30000,
   withCredentials: true,
 });
+
+const clearAuthAndNotify = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.dispatchEvent(new Event(AUTH_CLEARED_EVENT));
+};
 
 api.interceptors.request.use(
   (config) => {
@@ -60,13 +68,12 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch {
-        // Fall through to the normal logout cleanup below.
+        // Fall through to auth cleanup below.
       }
     }
 
     if (error.response?.status === 401 && !isAuthEndpoint) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      clearAuthAndNotify();
 
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';

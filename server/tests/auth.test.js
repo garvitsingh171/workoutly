@@ -14,12 +14,14 @@ process.env.MONGODB_URI_TEST = process.env.MONGODB_URI_TEST || process.env.MONGO
 const app = require('../app');
 const User = require('../src/models/User');
 const Workout = require('../src/models/Workout');
+const WorkoutSession = require('../src/models/WorkoutSession');
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URI_TEST);
 });
 
 afterEach(async () => {
+  await WorkoutSession.deleteMany({});
   await Workout.deleteMany({});
   await User.deleteMany({});
 });
@@ -43,6 +45,45 @@ const validWorkoutPayload = (name = 'Push Day') => ({
   ],
 });
 
+const validSessionPayload = (workoutId, completedAt = new Date()) => {
+  const startedAt = new Date(completedAt.getTime() - 30 * 60 * 1000);
+
+  return {
+    workout: workoutId,
+    startedAt: startedAt.toISOString(),
+    completedAt: completedAt.toISOString(),
+    durationMinutes: 30,
+    exercises: [
+      {
+        name: 'Push Ups',
+        sets: [
+          {
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: 10,
+            weight: 5,
+            completed: true,
+          },
+          {
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: 8,
+            weight: 10,
+            completed: true,
+          },
+          {
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: 6,
+            weight: 20,
+            completed: false,
+          },
+        ],
+      },
+    ],
+  };
+};
+
 const registerTestUser = async (email = 'testuser@example.com') => {
   const res = await request(app).post('/api/auth/register').send({
     name: 'Test User',
@@ -54,6 +95,13 @@ const registerTestUser = async (email = 'testuser@example.com') => {
     token: res.body.token,
     user: res.body.user,
   };
+};
+
+const createWorkoutForUser = async (user, name = 'Push Day') => {
+  return request(app)
+    .post('/api/workouts')
+    .set('Authorization', `Bearer ${user.token}`)
+    .send(validWorkoutPayload(name));
 };
 
 describe('Auth Routes', () => {
@@ -114,8 +162,30 @@ describe('Auth Routes', () => {
     expect(res.body).toHaveProperty('success', true);
     expect(res.body).toHaveProperty('token');
     expect(res.body).toHaveProperty('user');
+    expect(typeof res.body.token).toBe('string');
+    expect(res.body.user).toHaveProperty('_id');
+    expect(res.body.user).toHaveProperty('email', 'login@example.com');
     expect(cookies.some((cookie) => cookie.startsWith('refreshToken='))).toBe(true);
     expect(cookies.some((cookie) => cookie.includes('HttpOnly'))).toBe(true);
+  });
+
+  test('should log in even when refresh token secret is not configured', async () => {
+    await registerTestUser('login-no-refresh@example.com');
+    const originalRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    delete process.env.JWT_REFRESH_SECRET;
+
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'login-no-refresh@example.com',
+      password: 'password123',
+    });
+
+    process.env.JWT_REFRESH_SECRET = originalRefreshSecret;
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('success', true);
+    expect(res.body).toHaveProperty('token');
+    expect(res.body).toHaveProperty('user');
+    expect(res.headers['set-cookie'] || []).toHaveLength(0);
   });
 
   test('should fail to log in with wrong password', async () => {
@@ -324,5 +394,139 @@ describe('Workout Routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty('id', createRes.body.data._id);
     expect(listRes.body.data).toHaveLength(0);
+  });
+
+  test('should duplicate own workout', async () => {
+    const user = await registerTestUser('workout-duplicate@example.com');
+    const createRes = await createWorkoutForUser(user, 'Duplicate Me');
+
+    const res = await request(app)
+      .post(`/api/workouts/${createRes.body.data._id}/duplicate`)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toHaveProperty('name', 'Duplicate Me Copy');
+    expect(res.body.data).toHaveProperty('author');
+    expect(res.body.data._id).not.toBe(createRes.body.data._id);
+  });
+
+  test('should keep duplicated workout names within the max length', async () => {
+    const user = await registerTestUser('workout-duplicate-long@example.com');
+    const longWorkoutName = 'A'.repeat(100);
+    const createRes = await createWorkoutForUser(user, longWorkoutName);
+
+    const res = await request(app)
+      .post(`/api/workouts/${createRes.body.data._id}/duplicate`)
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.name).toHaveLength(100);
+    expect(res.body.data.name.endsWith(' Copy')).toBe(true);
+  });
+
+  test('should not duplicate another user workout', async () => {
+    const firstUser = await registerTestUser('workout-duplicate-blocked@example.com');
+    const secondUser = await registerTestUser('workout-duplicate-owner@example.com');
+    const createRes = await createWorkoutForUser(secondUser, 'Private Duplicate');
+
+    const res = await request(app)
+      .post(`/api/workouts/${createRes.body.data._id}/duplicate`)
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty('success', false);
+  });
+});
+
+describe('Workout Session Routes', () => {
+  test('should not create a session without a token', async () => {
+    const res = await request(app)
+      .post('/api/sessions')
+      .send(validSessionPayload(new mongoose.Types.ObjectId().toString()));
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should create a session for own workout', async () => {
+    const user = await registerTestUser('session-create@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Session Workout');
+
+    const res = await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('success', true);
+    expect(res.body.data).toHaveProperty('workoutName', 'Session Workout');
+    expect(res.body.data).toHaveProperty('totalCompletedSets', 2);
+    expect(res.body.data).toHaveProperty('totalVolume', 130);
+  });
+
+  test('should not create a session for another user workout', async () => {
+    const firstUser = await registerTestUser('session-blocked@example.com');
+    const secondUser = await registerTestUser('session-owner@example.com');
+    const workoutRes = await createWorkoutForUser(secondUser, 'Private Session Workout');
+
+    const res = await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should list only current user sessions', async () => {
+    const firstUser = await registerTestUser('session-list-owner@example.com');
+    const secondUser = await registerTestUser('session-list-other@example.com');
+    const firstWorkoutRes = await createWorkoutForUser(firstUser, 'Owner Session');
+    const secondWorkoutRes = await createWorkoutForUser(secondUser, 'Other Session');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(firstWorkoutRes.body.data._id));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${secondUser.token}`)
+      .send(validSessionPayload(secondWorkoutRes.body.data._id));
+
+    const res = await request(app)
+      .get('/api/sessions?page=1&limit=10')
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toHaveProperty('workoutName', 'Owner Session');
+    expect(res.body).toHaveProperty('pagination');
+  });
+
+  test('should return real summary totals', async () => {
+    const user = await registerTestUser('session-summary@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Summary Session');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    const res = await request(app)
+      .get('/api/sessions/summary')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty('totalSessions', 2);
+    expect(res.body.data).toHaveProperty('totalCompletedSets', 4);
+    expect(res.body.data).toHaveProperty('totalVolume', 260);
+    expect(res.body.data).toHaveProperty('sessionsThisWeek');
+    expect(res.body.data).toHaveProperty('latestSession');
   });
 });

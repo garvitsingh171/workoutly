@@ -55,7 +55,7 @@ const loginUser = async ({ email, password }) => {
 
   return {
     token: generateAccessToken(user._id),
-    refreshToken: generateRefreshToken(user._id),
+    refreshToken: process.env.JWT_REFRESH_SECRET ? generateRefreshToken(user._id) : null,
     user: buildUserResponse(user),
   };
 };

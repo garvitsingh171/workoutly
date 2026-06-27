@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -24,6 +24,16 @@ const Dashboard = () => {
   const [workoutsLoading, setWorkoutsLoading] = useState(true);
   const [workoutsError, setWorkoutsError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [summaryError, setSummaryError] = useState('');
+  const [duplicatingWorkoutId, setDuplicatingWorkoutId] = useState('');
+  const [sessionSummary, setSessionSummary] = useState({
+    totalSessions: 0,
+    totalCompletedSets: 0,
+    totalVolume: 0,
+    latestSession: null,
+    sessionsThisWeek: 0,
+    currentStreakDays: 0,
+  });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -79,35 +89,54 @@ const Dashboard = () => {
     fetchProfile();
   }, [user?._id]);
 
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      setWorkoutsLoading(true);
-      setWorkoutsError('');
+  const fetchWorkouts = useCallback(async () => {
+    setWorkoutsLoading(true);
+    setWorkoutsError('');
 
-      try {
-        const response = await api.get(`/api/workouts?page=${currentPage}&limit=10`);
-        setWorkouts(response.data.data || []);
-        setPagination(
-          response.data.pagination || {
-            page: currentPage,
-            limit: 10,
-            total: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPrevPage: false,
-          }
-        );
-      } catch (error) {
-        const message = getErrorMessage(error, 'Failed to load workouts.');
-        setWorkoutsError(message);
-        toast.error(message);
-      } finally {
-        setWorkoutsLoading(false);
-      }
-    };
-
-    fetchWorkouts();
+    try {
+      const response = await api.get(`/api/workouts?page=${currentPage}&limit=10`);
+      setWorkouts(response.data.data || []);
+      setPagination(
+        response.data.pagination || {
+          page: currentPage,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        }
+      );
+    } catch (error) {
+      const message = getErrorMessage(error, 'Failed to load workouts.');
+      setWorkoutsError(message);
+      toast.error(message);
+    } finally {
+      setWorkoutsLoading(false);
+    }
   }, [currentPage]);
+
+  const fetchSessionSummary = useCallback(async () => {
+    setSummaryError('');
+
+    try {
+      const response = await api.get('/api/sessions/summary');
+      setSessionSummary((prevSummary) => ({
+        ...prevSummary,
+        ...(response.data.data || {}),
+      }));
+    } catch (error) {
+      const message = getErrorMessage(error, 'Failed to load workout stats.');
+      setSummaryError(message);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWorkouts();
+  }, [fetchWorkouts]);
+
+  useEffect(() => {
+    fetchSessionSummary();
+  }, [fetchSessionSummary]);
 
   const handlePageChange = (page) => {
     if (page < 1 || page === currentPage) {
@@ -139,17 +168,27 @@ const Dashboard = () => {
     }
   };
 
-  const totalRoutines = workouts.length;
-  const totalExercises = workouts.reduce((total, workout) => total + (workout.exercises?.length || 0), 0);
-  const totalDuration = workouts.reduce((total, workout) => total + (Number(workout.duration) || 0), 0);
-  const averageDuration = totalRoutines > 0 ? Math.round(totalDuration / totalRoutines) : 0;
-  const difficultyCounts = workouts.reduce(
-    (counts, workout) => ({
-      ...counts,
-      [workout.difficulty]: (counts[workout.difficulty] || 0) + 1,
-    }),
-    { beginner: 0, intermediate: 0, advanced: 0 }
-  );
+  const handleDuplicateWorkout = async (workoutId) => {
+    setActionError('');
+    setDuplicatingWorkoutId(workoutId);
+
+    try {
+      const response = await api.post(`/api/workouts/${workoutId}/duplicate`);
+      if (response.data.success) {
+        toast.success('Workout duplicated successfully!');
+        await fetchWorkouts();
+      }
+    } catch (error) {
+      const message = getErrorMessage(error, 'Failed to duplicate workout.');
+      setActionError(message);
+      toast.error(message);
+    } finally {
+      setDuplicatingWorkoutId('');
+    }
+  };
+
+  const totalRoutines = pagination.total || workouts.length;
+  const totalVolume = Math.round(sessionSummary.totalVolume || 0);
   const athleteName = profile?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Athlete';
 
   if (loading) {
@@ -190,29 +229,28 @@ const Dashboard = () => {
         {profileError && <div className="alert alert-error">{profileError}</div>}
         {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
         {actionError && <div className="alert alert-error">{actionError}</div>}
+        {summaryError && <div className="alert alert-error">{summaryError}</div>}
 
         <div className="stats-grid" aria-label="Workout summary">
           <article className="stat-card">
             <p className="stat-card__label">Total routines</p>
             <p className="stat-card__value">{totalRoutines}</p>
-            <p className="stat-card__hint">Loaded in this view</p>
+            <p className="stat-card__hint">Saved workout templates</p>
           </article>
           <article className="stat-card">
-            <p className="stat-card__label">Total exercises</p>
-            <p className="stat-card__value">{totalExercises}</p>
-            <p className="stat-card__hint">Across loaded routines</p>
+            <p className="stat-card__label">Completed sessions</p>
+            <p className="stat-card__value">{sessionSummary.totalSessions || 0}</p>
+            <p className="stat-card__hint">Finished workouts saved</p>
           </article>
           <article className="stat-card">
-            <p className="stat-card__label">Average duration</p>
-            <p className="stat-card__value">{averageDuration}m</p>
-            <p className="stat-card__hint">Based on routine duration</p>
+            <p className="stat-card__label">Sessions this week</p>
+            <p className="stat-card__value">{sessionSummary.sessionsThisWeek || 0}</p>
+            <p className="stat-card__hint">Since the start of this week</p>
           </article>
           <article className="stat-card">
-            <p className="stat-card__label">Difficulty mix</p>
-            <p className="stat-card__value">
-              {difficultyCounts.beginner}/{difficultyCounts.intermediate}/{difficultyCounts.advanced}
-            </p>
-            <p className="stat-card__hint">Beginner / Intermediate / Advanced</p>
+            <p className="stat-card__label">Total volume</p>
+            <p className="stat-card__value">{totalVolume}</p>
+            <p className="stat-card__hint">{sessionSummary.totalCompletedSets || 0} completed sets</p>
           </article>
         </div>
 
@@ -298,6 +336,14 @@ const Dashboard = () => {
                       </Button>
                       <Button as={Link} to={`/workouts/edit/${workout._id}`} variant="secondary" fullWidth>
                         Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleDuplicateWorkout(workout._id)}
+                        disabled={duplicatingWorkoutId === workout._id}
+                        fullWidth
+                      >
+                        {duplicatingWorkoutId === workout._id ? 'Copying...' : 'Duplicate'}
                       </Button>
                       <Button
                         variant="danger"

@@ -46,6 +46,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', require('./src/routes/userRoutes'));
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/workouts', require('./src/routes/workoutRoutes'));
+app.use('/api/sessions', require('./src/routes/sessionRoutes'));
 app.use('/api/upload', require('./src/routes/upload'));
 
 app.use(notFound);

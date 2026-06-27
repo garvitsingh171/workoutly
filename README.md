@@ -26,6 +26,9 @@ project-root/
 - Authorization checks for workout read/update/delete ownership
 - Workout CRUD operations
 - Pagination with page and limit (limit capped on backend)
+- Completed workout session history
+- Dashboard stats from saved workouts and completed sessions
+- Duplicate workout templates
 - Centralized backend error handling with consistent response shape
 - Frontend toast-based error feedback
 
@@ -94,7 +97,7 @@ Client runs on [http://localhost:5173](http://localhost:5173) and server runs on
 
 - POST /api/users/register -> register user
 - POST /api/auth/register -> register user
-- POST /api/auth/login -> login user, return access token, and set httpOnly refresh-token cookie
+- POST /api/auth/login -> login user and return access token
 - POST /api/auth/refresh -> issue a new access token from the refresh-token cookie
 - POST /api/auth/logout -> clear the refresh-token cookie
 - GET /api/users/:id -> get current user profile (protected)
@@ -103,8 +106,13 @@ Client runs on [http://localhost:5173](http://localhost:5173) and server runs on
 - GET /api/workouts/:id -> get one workout (protected + ownership)
 - PUT /api/workouts/:id -> update workout (protected + ownership)
 - DELETE /api/workouts/:id -> delete workout (protected + ownership)
+- POST /api/workouts/:id/duplicate -> duplicate one owned workout template (protected + ownership)
+- POST /api/sessions -> save a completed workout session (protected + ownership)
+- GET /api/sessions?page=1&limit=10 -> list completed sessions, latest first (protected)
+- GET /api/sessions/recent -> list latest 5 completed sessions (protected)
+- GET /api/sessions/summary -> get dashboard session stats (protected)
 
-Access tokens are still sent by the frontend in the Authorization header. The refresh token is stored by the browser as an httpOnly cookie named refreshToken and is not exposed in localStorage.
+Access tokens are sent by the frontend in the Authorization header and stored in localStorage with the user object. Refresh-token endpoints still exist, but login no longer depends on refresh-token configuration.
 
 ## Error Handling Contract
 
@@ -128,11 +136,14 @@ Use this sequence to verify end-to-end behavior:
 5. Create workout
 6. View paginated workouts
 7. Edit owned workout
-8. Delete owned workout
-9. Refresh the page after login and confirm the session is restored
-10. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
-11. Trigger unauthorized access and verify clear error
-12. Logout and confirm protected routes are blocked
+8. Duplicate an owned workout
+9. Start a workout session, complete some sets, and finish it
+10. Confirm dashboard stats update from saved session data
+11. Delete owned workout
+12. Refresh the page after login and confirm the session is restored
+13. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
+14. Trigger unauthorized access and verify clear error
+15. Logout and confirm protected routes are blocked
 
 ## Submission Notes
 

@@ -63,7 +63,9 @@ const loginUser = async (req, res, next) => {
   try {
     const { token, refreshToken, user } = await authService.loginUser(req.body);
 
-    setRefreshCookie(res, refreshToken);
+    if (refreshToken) {
+      setRefreshCookie(res, refreshToken);
+    }
 
     return sendSuccess(res, 200, 'Login successful', { token, user }, {
       token,

@@ -46,6 +46,15 @@ const ensureWorkoutOwner = (workout, userId, action) => {
   }
 };
 
+const buildDuplicateWorkoutName = (workoutName) => {
+  const copySuffix = ' Copy';
+  const maxWorkoutNameLength = 100;
+  const baseName = String(workoutName || '').trim();
+  const maxBaseLength = maxWorkoutNameLength - copySuffix.length;
+
+  return `${baseName.slice(0, maxBaseLength)}${copySuffix}`;
+};
+
 const createWorkout = async (body, userId) => {
   const payload = buildWorkoutPayload(body);
 
@@ -128,10 +137,35 @@ const deleteWorkout = async (workoutId, userId) => {
   return { id: workoutId };
 };
 
+const duplicateWorkout = async (workoutId, userId) => {
+  const workout = await workoutRepository.findWorkoutById(workoutId);
+
+  if (!workout) {
+    throw new AppError('Workout not found', 404);
+  }
+
+  ensureWorkoutOwner(workout, userId, 'duplicate');
+
+  return workoutRepository.createWorkout({
+    name: buildDuplicateWorkoutName(workout.name),
+    exercises: workout.exercises.map((exercise) => ({
+      name: exercise.name,
+      sets: exercise.sets,
+      reps: exercise.reps,
+    })),
+    duration: workout.duration,
+    difficulty: workout.difficulty,
+    notes: workout.notes,
+    coverImage: workout.coverImage,
+    author: userId,
+  });
+};
+
 module.exports = {
   createWorkout,
   getWorkouts,
   getWorkoutById,
   updateWorkout,
   deleteWorkout,
+  duplicateWorkout,
 };
