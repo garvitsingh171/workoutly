@@ -5,6 +5,7 @@ const {
 	getWorkoutById,
 	updateWorkout,
 	deleteWorkout,
+	duplicateWorkout,
 } = require('../controllers/workoutController');
 const { protect } = require('../middleware/auth');
 const { workoutIdValidator, workoutValidator } = require('../validators/workoutValidators');
@@ -16,6 +17,10 @@ router
 	.route('/')
 	.post(protect, workoutValidator, validateRequest, createWorkout)
 	.get(protect, getWorkouts);
+
+router
+	.route('/:id/duplicate')
+	.post(protect, workoutIdValidator, validateRequest, duplicateWorkout);
 
 router
 	.route('/:id')

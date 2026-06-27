@@ -66,10 +66,24 @@ const deleteWorkout = async (req, res, next) => {
   }
 };
 
+// @desc    Duplicate workout
+// @route   POST /api/workouts/:id/duplicate
+// @access  Private
+const duplicateWorkout = async (req, res, next) => {
+  try {
+    const workout = await workoutService.duplicateWorkout(req.params.id, req.user._id);
+
+    return sendSuccess(res, 201, 'Workout duplicated successfully', workout);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   createWorkout,
   getWorkouts,
   getWorkoutById,
   updateWorkout,
   deleteWorkout,
+  duplicateWorkout,
 };
