@@ -17,6 +17,7 @@ const Workout = require('../src/models/Workout');
 const WorkoutSession = require('../src/models/WorkoutSession');
 const PersonalRecord = require('../src/models/PersonalRecord');
 const Exercise = require('../src/models/Exercise');
+const Goal = require('../src/models/Goal');
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URI_TEST);
@@ -25,6 +26,7 @@ beforeAll(async () => {
 afterEach(async () => {
   await PersonalRecord.deleteMany({});
   await Exercise.deleteMany({});
+  await Goal.deleteMany({});
   await WorkoutSession.deleteMany({});
   await Workout.deleteMany({});
   await User.deleteMany({});
@@ -508,6 +510,132 @@ describe('Workout Session Routes', () => {
     expect(res.body).toHaveProperty('pagination');
   });
 
+  test('should require auth for session history', async () => {
+    const res = await request(app).get('/api/sessions');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should filter session history by date and workout name', async () => {
+    const user = await registerTestUser('session-filter@example.com');
+    const pushWorkoutRes = await createWorkoutForUser(user, 'Push History');
+    const pullWorkoutRes = await createWorkoutForUser(user, 'Pull History');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(pushWorkoutRes.body.data._id, new Date('2026-07-01T10:00:00.000Z')));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(pullWorkoutRes.body.data._id, new Date('2026-07-03T10:00:00.000Z')));
+
+    const dateRes = await request(app)
+      .get('/api/sessions?from=2026-07-02&to=2026-07-04')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    const nameRes = await request(app)
+      .get('/api/sessions?workoutName=push')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(dateRes.status).toBe(200);
+    expect(dateRes.body.data).toHaveLength(1);
+    expect(dateRes.body.data[0]).toHaveProperty('workoutName', 'Pull History');
+    expect(nameRes.status).toBe(200);
+    expect(nameRes.body.data).toHaveLength(1);
+    expect(nameRes.body.data[0]).toHaveProperty('workoutName', 'Push History');
+  });
+
+  test('should reject invalid session history date filters', async () => {
+    const user = await registerTestUser('session-filter-invalid@example.com');
+
+    const res = await request(app)
+      .get('/api/sessions?from=bad-date')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('success', false);
+    expect(res.body.message).toContain('YYYY-MM-DD');
+  });
+
+  test('should group calendar sessions by date for current user only', async () => {
+    const firstUser = await registerTestUser('calendar-owner@example.com');
+    const secondUser = await registerTestUser('calendar-other@example.com');
+    const firstWorkoutRes = await createWorkoutForUser(firstUser, 'Calendar Owner');
+    const secondWorkoutRes = await createWorkoutForUser(secondUser, 'Calendar Other');
+    const trainedDate = new Date('2026-07-01T10:00:00.000Z');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(firstWorkoutRes.body.data._id, trainedDate));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(firstWorkoutRes.body.data._id, trainedDate));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${secondUser.token}`)
+      .send(validSessionPayload(secondWorkoutRes.body.data._id, trainedDate));
+
+    const res = await request(app)
+      .get('/api/sessions/calendar?month=2026-07')
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toEqual({
+      date: '2026-07-01',
+      sessionCount: 2,
+      totalVolume: 260,
+      totalCompletedSets: 4,
+    });
+  });
+
+  test('should require auth for CSV export', async () => {
+    const res = await request(app).get('/api/sessions/export.csv');
+
+    expect(res.status).toBe(401);
+  });
+
+  test('should export current user sessions as CSV rows per set', async () => {
+    const firstUser = await registerTestUser('csv-owner@example.com');
+    const secondUser = await registerTestUser('csv-other@example.com');
+    const firstWorkoutRes = await createWorkoutForUser(firstUser, 'CSV Owner');
+    const secondWorkoutRes = await createWorkoutForUser(secondUser, 'CSV Other');
+    const payload = validSessionPayload(firstWorkoutRes.body.data._id, new Date('2026-07-01T10:00:00.000Z'));
+    payload.exercises[0].sets = payload.exercises[0].sets.slice(0, 2);
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(payload);
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${secondUser.token}`)
+      .send(validSessionPayload(secondWorkoutRes.body.data._id, new Date('2026-07-01T10:00:00.000Z')));
+
+    const res = await request(app)
+      .get('/api/sessions/export.csv')
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    const rows = res.text.trim().split('\n');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/csv');
+    expect(rows[0]).toBe(
+      'sessionId,workoutName,completedAt,durationMinutes,exerciseName,setNumber,targetReps,actualReps,weight,completed,totalVolume'
+    );
+    expect(rows).toHaveLength(3);
+    expect(res.text).toContain('CSV Owner');
+    expect(res.text).not.toContain('CSV Other');
+  });
+
   test('should return real summary totals', async () => {
     const user = await registerTestUser('session-summary@example.com');
     const workoutRes = await createWorkoutForUser(user, 'Summary Session');
@@ -607,6 +735,95 @@ describe('Workout Session Routes', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('success', true);
     expect(res.body.data).toEqual([]);
+  });
+});
+
+describe('Goal Routes', () => {
+  test('should require auth for current goal', async () => {
+    const res = await request(app).get('/api/goals/current');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should return a default current goal when none exists', async () => {
+    const user = await registerTestUser('goal-current@example.com');
+
+    const res = await request(app)
+      .get('/api/goals/current')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty('weeklyWorkoutTarget', 3);
+    expect(res.body.data).toHaveProperty('isActive', true);
+  });
+
+  test('should update the weekly workout target', async () => {
+    const user = await registerTestUser('goal-update@example.com');
+
+    const res = await request(app)
+      .put('/api/goals/current')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ weeklyWorkoutTarget: 5 });
+
+    const currentRes = await request(app)
+      .get('/api/goals/current')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty('weeklyWorkoutTarget', 5);
+    expect(currentRes.body.data).toHaveProperty('weeklyWorkoutTarget', 5);
+  });
+
+  test('should reject invalid weekly workout targets', async () => {
+    const user = await registerTestUser('goal-invalid@example.com');
+
+    const res = await request(app)
+      .put('/api/goals/current')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ weeklyWorkoutTarget: 15 });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('success', false);
+    expect(res.body.message).toContain('between 1 and 14');
+  });
+
+  test('should return goal summary with weekly sessions and streak fields', async () => {
+    const user = await registerTestUser('goal-summary@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Goal Summary Workout');
+    const today = new Date();
+    today.setHours(10, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    await request(app)
+      .put('/api/goals/current')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({ weeklyWorkoutTarget: 4 });
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id, yesterday));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id, today));
+
+    const res = await request(app)
+      .get('/api/goals/summary')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty('weeklyWorkoutTarget', 4);
+    expect(res.body.data).toHaveProperty('sessionsThisWeek');
+    expect(res.body.data.sessionsThisWeek).toBeGreaterThanOrEqual(1);
+    expect(res.body.data).toHaveProperty('remainingThisWeek');
+    expect(res.body.data).toHaveProperty('weeklyProgressPercent');
+    expect(res.body.data).toHaveProperty('currentStreakDays');
+    expect(res.body.data).toHaveProperty('longestStreakDays');
+    expect(res.body.data.currentStreakDays).toBeGreaterThanOrEqual(1);
   });
 });
 

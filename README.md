@@ -27,6 +27,9 @@ project-root/
 - Workout CRUD operations
 - Pagination with page and limit (limit capped on backend)
 - Completed workout session history
+- Workout history filters and monthly calendar summary
+- Weekly workout goals and streak tracking
+- CSV export for completed workout sessions
 - Dashboard stats from saved workouts and completed sessions
 - Duplicate workout templates
 - Exercise progress tracking from completed sessions
@@ -112,9 +115,14 @@ Client runs on [http://localhost:5173](http://localhost:5173) and server runs on
 - POST /api/workouts/:id/duplicate -> duplicate one owned workout template (protected + ownership)
 - POST /api/sessions -> save a completed workout session (protected + ownership)
 - GET /api/sessions?page=1&limit=10 -> list completed sessions, latest first (protected)
+- GET /api/sessions/calendar?month=2026-07 -> grouped session counts by date (protected)
+- GET /api/sessions/export.csv -> export completed sessions as CSV (protected)
 - GET /api/sessions/recent -> list latest 5 completed sessions (protected)
 - GET /api/sessions/summary -> get dashboard session stats (protected)
 - GET /api/sessions/progress?exerciseName=Bench%20Press -> get exercise progress history (protected)
+- GET /api/goals/current -> get current weekly workout goal (protected)
+- PUT /api/goals/current -> update current weekly workout goal (protected)
+- GET /api/goals/summary -> get weekly progress and streak summary (protected)
 - GET /api/records -> list personal records for current user (protected)
 - GET /api/records/:exerciseName -> list personal records for one exercise (protected)
 - GET /api/exercises -> list default and custom exercises, with optional search/category/equipment filters (protected)
@@ -158,13 +166,17 @@ Use this sequence to verify end-to-end behavior:
 12. Open Records and verify max weight, reps, and volume records
 13. Open Progress and search an exercise from the completed session
 14. Try another user and confirm progress and records are private
-15. Run `cd server && npm run seed:exercises` if you want to persist default exercises in MongoDB
-16. Confirm dashboard stats update from saved session data
-17. Delete owned workout
-18. Refresh the page after login and confirm the session is restored
-19. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
-20. Trigger unauthorized access and verify clear error
-21. Logout and confirm protected routes are blocked
+15. Open History and confirm completed sessions appear
+16. Test History date filters and calendar highlights
+17. Open Goals, set a weekly target, and confirm progress updates
+18. Export History CSV and confirm session data is correct
+19. Run `cd server && npm run seed:exercises` if you want to persist default exercises in MongoDB
+20. Confirm dashboard stats update from saved session data
+21. Delete owned workout
+22. Refresh the page after login and confirm the session is restored
+23. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
+24. Trigger unauthorized access and verify clear error
+25. Logout and confirm protected routes are blocked
 
 ## Submission Notes
 
