@@ -20,6 +20,9 @@ const Header = () => {
         {isAuthenticated() ? (
           <>
             <Link to="/dashboard" className="site-header__link">Dashboard</Link>
+            <Link to="/progress" className="site-header__link">Progress</Link>
+            <Link to="/records" className="site-header__link">Records</Link>
+            <Link to="/exercises" className="site-header__link">Exercises</Link>
             {firstName && <span className="site-header__user-text">Hi, {firstName}</span>}
             <ThemeToggle />
             <button onClick={logout} className="site-header__logout-btn">

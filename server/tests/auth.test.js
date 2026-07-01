@@ -15,12 +15,16 @@ const app = require('../app');
 const User = require('../src/models/User');
 const Workout = require('../src/models/Workout');
 const WorkoutSession = require('../src/models/WorkoutSession');
+const PersonalRecord = require('../src/models/PersonalRecord');
+const Exercise = require('../src/models/Exercise');
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URI_TEST);
 });
 
 afterEach(async () => {
+  await PersonalRecord.deleteMany({});
+  await Exercise.deleteMany({});
   await WorkoutSession.deleteMany({});
   await Workout.deleteMany({});
   await User.deleteMany({});
@@ -528,5 +532,226 @@ describe('Workout Session Routes', () => {
     expect(res.body.data).toHaveProperty('totalVolume', 260);
     expect(res.body.data).toHaveProperty('sessionsThisWeek');
     expect(res.body.data).toHaveProperty('latestSession');
+  });
+
+  test('should require auth for exercise progress', async () => {
+    const res = await request(app).get('/api/sessions/progress?exerciseName=Push%20Ups');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should return progress for selected exercise sorted by completion date', async () => {
+    const user = await registerTestUser('progress-selected@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Progress Workout');
+    const laterDate = new Date('2026-07-02T10:00:00.000Z');
+    const earlierDate = new Date('2026-07-01T10:00:00.000Z');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id, laterDate));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id, earlierDate));
+
+    const res = await request(app)
+      .get('/api/sessions/progress?exerciseName=push%20ups')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('success', true);
+    expect(res.body.data).toHaveLength(2);
+    expect(res.body.data[0]).toHaveProperty('completedAt', earlierDate.toISOString());
+    expect(res.body.data[0]).toHaveProperty('workoutName', 'Progress Workout');
+    expect(res.body.data[0]).toHaveProperty('bestWeight', 10);
+    expect(res.body.data[0]).toHaveProperty('bestReps', 10);
+    expect(res.body.data[0]).toHaveProperty('totalVolume', 130);
+    expect(res.body.data[0]).toHaveProperty('completedSets', 2);
+  });
+
+  test('should return only current user progress data', async () => {
+    const firstUser = await registerTestUser('progress-owner@example.com');
+    const secondUser = await registerTestUser('progress-other@example.com');
+    const firstWorkoutRes = await createWorkoutForUser(firstUser, 'Owner Progress');
+    const secondWorkoutRes = await createWorkoutForUser(secondUser, 'Other Progress');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(firstWorkoutRes.body.data._id));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${secondUser.token}`)
+      .send(validSessionPayload(secondWorkoutRes.body.data._id));
+
+    const res = await request(app)
+      .get('/api/sessions/progress?exerciseName=Push%20Ups')
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0]).toHaveProperty('workoutName', 'Owner Progress');
+  });
+
+  test('should return an empty progress array when no data exists', async () => {
+    const user = await registerTestUser('progress-empty@example.com');
+
+    const res = await request(app)
+      .get('/api/sessions/progress?exerciseName=Bench%20Press')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('success', true);
+    expect(res.body.data).toEqual([]);
+  });
+});
+
+describe('Personal Record Routes', () => {
+  test('should create personal records after saving a session', async () => {
+    const user = await registerTestUser('records-create@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Record Workout');
+
+    const sessionRes = await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    const recordsRes = await request(app)
+      .get('/api/records')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(sessionRes.status).toBe(201);
+    expect(sessionRes.body.newRecords).toHaveLength(3);
+    expect(recordsRes.status).toBe(200);
+    expect(recordsRes.body.data).toHaveLength(3);
+    expect(recordsRes.body.data.map((record) => record.recordType).sort()).toEqual([
+      'max_reps',
+      'max_volume',
+      'max_weight',
+    ]);
+  });
+
+  test('should update records only when the new value is higher', async () => {
+    const user = await registerTestUser('records-update@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Record Update Workout');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(workoutRes.body.data._id));
+
+    const lowerPayload = validSessionPayload(workoutRes.body.data._id);
+    lowerPayload.exercises[0].sets = [
+      {
+        setNumber: 1,
+        targetReps: 12,
+        actualReps: 4,
+        weight: 2,
+        completed: true,
+      },
+    ];
+
+    const lowerRes = await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(lowerPayload);
+
+    const recordsRes = await request(app)
+      .get('/api/records/Push%20Ups')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    const maxWeight = recordsRes.body.data.find((record) => record.recordType === 'max_weight');
+    const maxReps = recordsRes.body.data.find((record) => record.recordType === 'max_reps');
+    const maxVolume = recordsRes.body.data.find((record) => record.recordType === 'max_volume');
+
+    expect(lowerRes.status).toBe(201);
+    expect(lowerRes.body.newRecords).toHaveLength(0);
+    expect(maxWeight.value).toBe(10);
+    expect(maxReps.value).toBe(10);
+    expect(maxVolume.value).toBe(130);
+  });
+
+  test('should not show another user records', async () => {
+    const firstUser = await registerTestUser('records-owner@example.com');
+    const secondUser = await registerTestUser('records-other@example.com');
+    const firstWorkoutRes = await createWorkoutForUser(firstUser, 'Owner Records');
+    const secondWorkoutRes = await createWorkoutForUser(secondUser, 'Other Records');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${firstUser.token}`)
+      .send(validSessionPayload(firstWorkoutRes.body.data._id));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${secondUser.token}`)
+      .send(validSessionPayload(secondWorkoutRes.body.data._id));
+
+    const res = await request(app)
+      .get('/api/records')
+      .set('Authorization', `Bearer ${firstUser.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(3);
+    expect(res.body.data.every((record) => record.workoutName === 'Owner Records')).toBe(true);
+  });
+});
+
+describe('Exercise Library Routes', () => {
+  test('should require auth for exercise list', async () => {
+    const res = await request(app).get('/api/exercises');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('success', false);
+  });
+
+  test('should list default exercises', async () => {
+    const user = await registerTestUser('exercises-list@example.com');
+
+    const res = await request(app)
+      .get('/api/exercises')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(15);
+    expect(res.body.data.some((exercise) => exercise.name === 'Bench Press')).toBe(true);
+  });
+
+  test('should search exercises', async () => {
+    const user = await registerTestUser('exercises-search@example.com');
+
+    const res = await request(app)
+      .get('/api/exercises?search=press')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body.data.every((exercise) => exercise.name.toLowerCase().includes('press'))).toBe(true);
+  });
+
+  test('should add a custom exercise', async () => {
+    const user = await registerTestUser('exercises-add@example.com');
+
+    const createRes = await request(app)
+      .post('/api/exercises')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        name: 'Incline Dumbbell Press',
+        category: 'chest',
+        equipment: 'dumbbell',
+      });
+
+    const listRes = await request(app)
+      .get('/api/exercises?search=incline')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.data).toHaveProperty('isDefault', false);
+    expect(listRes.body.data).toHaveLength(1);
+    expect(listRes.body.data[0]).toHaveProperty('name', 'Incline Dumbbell Press');
   });
 });

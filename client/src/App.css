@@ -1218,6 +1218,153 @@
   color: var(--text) !important;
 }
 
+/* Progress, Records, Exercises */
+.feature-panel {
+  margin-bottom: var(--space-5);
+}
+
+.progress-search {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.progress-search__field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.basic-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.basic-table th,
+.basic-table td {
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.basic-table th {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.volume-cell {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.volume-bar {
+  width: 100%;
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--interactive-bg);
+}
+
+.volume-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.record-card__title {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+.record-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--row-bg);
+}
+
+.record-row__label,
+.record-row__meta {
+  margin: 0;
+}
+
+.record-row__label {
+  color: var(--text-strong);
+  font-weight: 800;
+}
+
+.record-row__meta {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.library-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.library-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr);
+  gap: var(--space-3);
+}
+
+.exercise-library-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.exercise-library-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--row-bg);
+}
+
+.exercise-library-item h4,
+.exercise-library-item p {
+  margin: 0;
+}
+
+.exercise-library-item p {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-transform: capitalize;
+}
+
 @media (max-width: 980px) {
   .home-hero,
   .dashboard-hero {
@@ -1230,8 +1377,14 @@
 
   .stats-grid,
   .workout-grid,
-  .features {
+  .features,
+  .record-grid,
+  .library-layout {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .library-layout {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1277,8 +1430,15 @@
   .form-grid--two,
   .stats-grid,
   .workout-grid,
-  .features {
+  .features,
+  .record-grid,
+  .library-filters {
     grid-template-columns: 1fr;
+  }
+
+  .progress-search {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .workout-card__actions {

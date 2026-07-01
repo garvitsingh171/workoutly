@@ -27,6 +27,20 @@ const EditWorkout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [exerciseOptions, setExerciseOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchExerciseOptions = async () => {
+      try {
+        const response = await api.get('/api/exercises');
+        setExerciseOptions(response.data.data || []);
+      } catch (requestError) {
+        toast.error(getErrorMessage(requestError, 'Failed to load exercise suggestions.'));
+      }
+    };
+
+    fetchExerciseOptions();
+  }, []);
 
   useEffect(() => {
     const fetchWorkout = async () => {
@@ -238,6 +252,7 @@ const EditWorkout = () => {
                         id={`exercise-name-${index}`}
                         className="ui-input"
                         type="text"
+                        list="edit-exercise-library-options"
                         value={exercise.name}
                         onChange={(event) => handleExerciseChange(index, 'name', event.target.value)}
                         required
@@ -289,6 +304,13 @@ const EditWorkout = () => {
                   </div>
                 ))}
               </div>
+              <datalist id="edit-exercise-library-options">
+                {exerciseOptions.map((option) => (
+                  <option key={option._id || option.name} value={option.name}>
+                    {option.category ? `${option.category} • ${option.equipment}` : option.name}
+                  </option>
+                ))}
+              </datalist>
             </Card.Body>
           </Card>
 

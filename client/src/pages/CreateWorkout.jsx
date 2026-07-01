@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api, { getErrorMessage } from "../services/api";
@@ -28,6 +28,20 @@ const CreateWorkout = () => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [exerciseOptions, setExerciseOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchExerciseOptions = async () => {
+      try {
+        const response = await api.get("/api/exercises");
+        setExerciseOptions(response.data.data || []);
+      } catch (requestError) {
+        toast.error(getErrorMessage(requestError, "Failed to load exercise suggestions."));
+      }
+    };
+
+    fetchExerciseOptions();
+  }, []);
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
@@ -244,6 +258,7 @@ const CreateWorkout = () => {
                         id={`exercise-name-${index}`}
                         className="ui-input"
                         type="text"
+                        list="exercise-library-options"
                         value={exercise.name}
                         onChange={(e) => handleExerciseChange(index, "name", e.target.value)}
                         placeholder="e.g. Squat"
@@ -289,6 +304,13 @@ const CreateWorkout = () => {
                   </div>
                 ))}
               </div>
+              <datalist id="exercise-library-options">
+                {exerciseOptions.map((option) => (
+                  <option key={option._id || option.name} value={option.name}>
+                    {option.category ? `${option.category} • ${option.equipment}` : option.name}
+                  </option>
+                ))}
+              </datalist>
             </Card.Body>
           </Card>
 

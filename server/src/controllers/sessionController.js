@@ -3,6 +3,7 @@ const Workout = require('../models/Workout');
 const WorkoutSession = require('../models/WorkoutSession');
 const AppError = require('../utils/AppError');
 const { sendSuccess } = require('../utils/apiResponse');
+const { updatePersonalRecordsForSession } = require('../services/recordService');
 
 const parsePositiveInteger = (value, fallback) => {
   const parsed = Number.parseInt(value, 10);
@@ -67,6 +68,8 @@ const getStartOfWeek = () => {
 
 const getDateKey = (date) => new Date(date).toISOString().slice(0, 10);
 
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const calculateCurrentStreakDays = (sessions) => {
   const sessionDays = new Set(sessions.map((session) => getDateKey(session.completedAt)));
   let currentDate = new Date();
@@ -118,7 +121,62 @@ const createSession = async (req, res, next) => {
       notes: typeof notes === 'string' ? notes.trim() : '',
     });
 
-    return sendSuccess(res, 201, 'Workout session saved successfully', session);
+    const newRecords = await updatePersonalRecordsForSession(session);
+
+    return sendSuccess(res, 201, 'Workout session saved successfully', session, { newRecords });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const getExerciseProgress = async (req, res, next) => {
+  try {
+    const exerciseName = String(req.query.exerciseName || '').trim();
+
+    if (!exerciseName) {
+      throw new AppError('exerciseName is required', 400);
+    }
+
+    const exerciseNameRegex = new RegExp(`^${escapeRegex(exerciseName)}$`, 'i');
+    const sessions = await WorkoutSession.find({
+      user: req.user._id,
+      'exercises.name': exerciseNameRegex,
+    }).sort({ completedAt: 1 });
+
+    const progress = sessions.map((session) => {
+      const matchingExercises = (session.exercises || []).filter((exercise) =>
+        exerciseNameRegex.test(exercise.name)
+      );
+
+      const completedSets = matchingExercises.flatMap((exercise) =>
+        (exercise.sets || []).filter((set) => set.completed)
+      );
+
+      const bestWeight = completedSets.reduce(
+        (best, set) => Math.max(best, Number(set.weight) || 0),
+        0
+      );
+      const bestReps = completedSets.reduce(
+        (best, set) => Math.max(best, Number(set.actualReps) || 0),
+        0
+      );
+      const totalVolume = completedSets.reduce(
+        (sum, set) => sum + (Number(set.actualReps) || 0) * (Number(set.weight) || 0),
+        0
+      );
+
+      return {
+        sessionId: session._id,
+        workoutName: session.workoutName,
+        completedAt: session.completedAt,
+        bestWeight,
+        bestReps,
+        totalVolume,
+        completedSets: completedSets.length,
+      };
+    });
+
+    return sendSuccess(res, 200, 'Exercise progress fetched successfully', progress);
   } catch (error) {
     return next(error);
   }
@@ -204,4 +262,5 @@ module.exports = {
   getSessions,
   getRecentSessions,
   getSessionSummary,
+  getExerciseProgress,
 };
