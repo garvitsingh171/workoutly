@@ -144,7 +144,10 @@ const ActiveSession = () => {
     };
 
     try {
-      await api.post('/api/sessions', payload);
+      const response = await api.post('/api/sessions', payload);
+      if (Array.isArray(response.data.newRecords) && response.data.newRecords.length > 0) {
+        toast.success('New personal record achieved!');
+      }
       toast.success('Workout completed and saved. Great job!');
       navigate('/dashboard');
     } catch (error) {

@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard';
 import CreateWorkout from './pages/CreateWorkout';
 import EditWorkout from './pages/EditWorkout';
 import ActiveSession from './pages/ActiveSession';
+import Progress from './pages/Progress';
+import Records from './pages/Records';
+import Exercises from './pages/Exercises';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
@@ -93,6 +96,30 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <ActiveSession />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/progress"
+              element={
+                <ProtectedRoute>
+                  <Progress />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/records"
+              element={
+                <ProtectedRoute>
+                  <Records />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/exercises"
+              element={
+                <ProtectedRoute>
+                  <Exercises />
                 </ProtectedRoute>
               }
             />

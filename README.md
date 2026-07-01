@@ -29,6 +29,9 @@ project-root/
 - Completed workout session history
 - Dashboard stats from saved workouts and completed sessions
 - Duplicate workout templates
+- Exercise progress tracking from completed sessions
+- Automatic personal record detection for max weight, reps, and volume
+- Basic exercise library with default and custom exercises
 - Centralized backend error handling with consistent response shape
 - Frontend toast-based error feedback
 
@@ -111,8 +114,20 @@ Client runs on [http://localhost:5173](http://localhost:5173) and server runs on
 - GET /api/sessions?page=1&limit=10 -> list completed sessions, latest first (protected)
 - GET /api/sessions/recent -> list latest 5 completed sessions (protected)
 - GET /api/sessions/summary -> get dashboard session stats (protected)
+- GET /api/sessions/progress?exerciseName=Bench%20Press -> get exercise progress history (protected)
+- GET /api/records -> list personal records for current user (protected)
+- GET /api/records/:exerciseName -> list personal records for one exercise (protected)
+- GET /api/exercises -> list default and custom exercises, with optional search/category/equipment filters (protected)
+- POST /api/exercises -> add a custom exercise (protected)
 
 Access tokens are sent by the frontend in the Authorization header and stored in localStorage with the user object. Refresh-token endpoints still exist, but login no longer depends on refresh-token configuration.
+
+## Exercise Library Seed
+
+Default exercises are available from the API even before seeding. To store the defaults in MongoDB manually, run:
+
+cd server
+npm run seed:exercises
 
 ## Error Handling Contract
 
@@ -137,13 +152,19 @@ Use this sequence to verify end-to-end behavior:
 6. View paginated workouts
 7. Edit owned workout
 8. Duplicate an owned workout
-9. Start a workout session, complete some sets, and finish it
-10. Confirm dashboard stats update from saved session data
-11. Delete owned workout
-12. Refresh the page after login and confirm the session is restored
-13. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
-14. Trigger unauthorized access and verify clear error
-15. Logout and confirm protected routes are blocked
+9. Create or edit a workout using exercise library suggestions
+10. Start a workout session, complete some sets, and finish it
+11. Confirm personal records are created
+12. Open Records and verify max weight, reps, and volume records
+13. Open Progress and search an exercise from the completed session
+14. Try another user and confirm progress and records are private
+15. Run `cd server && npm run seed:exercises` if you want to persist default exercises in MongoDB
+16. Confirm dashboard stats update from saved session data
+17. Delete owned workout
+18. Refresh the page after login and confirm the session is restored
+19. Check browser devtools Application/Cookies for refreshToken and confirm it is httpOnly
+20. Trigger unauthorized access and verify clear error
+21. Logout and confirm protected routes are blocked
 
 ## Submission Notes
 
