@@ -34,6 +34,7 @@ const Dashboard = () => {
     sessionsThisWeek: 0,
     currentStreakDays: 0,
   });
+  const [goalSummary, setGoalSummary] = useState(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -130,6 +131,15 @@ const Dashboard = () => {
     }
   }, []);
 
+  const fetchGoalSummary = useCallback(async () => {
+    try {
+      const response = await api.get('/api/goals/summary');
+      setGoalSummary(response.data.data || null);
+    } catch {
+      setGoalSummary(null);
+    }
+  }, []);
+
   useEffect(() => {
     fetchWorkouts();
   }, [fetchWorkouts]);
@@ -137,6 +147,10 @@ const Dashboard = () => {
   useEffect(() => {
     fetchSessionSummary();
   }, [fetchSessionSummary]);
+
+  useEffect(() => {
+    fetchGoalSummary();
+  }, [fetchGoalSummary]);
 
   const handlePageChange = (page) => {
     if (page < 1 || page === currentPage) {
@@ -252,6 +266,17 @@ const Dashboard = () => {
             <p className="stat-card__value">{totalVolume}</p>
             <p className="stat-card__hint">{sessionSummary.totalCompletedSets || 0} completed sets</p>
           </article>
+          {goalSummary && (
+            <article className="stat-card dashboard-goal-card">
+              <p className="stat-card__label">Weekly goal</p>
+              <p className="stat-card__value">
+                {goalSummary.sessionsThisWeek || 0} / {goalSummary.weeklyWorkoutTarget || 3}
+              </p>
+              <p className="stat-card__hint">
+                This week · Current streak: {goalSummary.currentStreakDays || 0} days
+              </p>
+            </article>
+          )}
         </div>
 
         <div className="dashboard-toolbar">

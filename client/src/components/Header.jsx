@@ -20,6 +20,8 @@ const Header = () => {
         {isAuthenticated() ? (
           <>
             <Link to="/dashboard" className="site-header__link">Dashboard</Link>
+            <Link to="/history" className="site-header__link">History</Link>
+            <Link to="/goals" className="site-header__link">Goals</Link>
             <Link to="/progress" className="site-header__link">Progress</Link>
             <Link to="/records" className="site-header__link">Records</Link>
             <Link to="/exercises" className="site-header__link">Exercises</Link>

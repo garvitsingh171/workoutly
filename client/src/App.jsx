@@ -11,6 +11,8 @@ import ActiveSession from './pages/ActiveSession';
 import Progress from './pages/Progress';
 import Records from './pages/Records';
 import Exercises from './pages/Exercises';
+import History from './pages/History';
+import Goals from './pages/Goals';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
@@ -112,6 +114,22 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <Records />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <History />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/goals"
+              element={
+                <ProtectedRoute>
+                  <Goals />
                 </ProtectedRoute>
               }
             />

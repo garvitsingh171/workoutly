@@ -70,6 +70,82 @@ const getDateKey = (date) => new Date(date).toISOString().slice(0, 10);
 
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const parseDateOnly = (value, label) => {
+  if (!value) return null;
+
+  const dateText = String(value).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+    throw new AppError(`${label} must be in YYYY-MM-DD format`, 400);
+  }
+
+  const date = new Date(`${dateText}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateText) {
+    throw new AppError(`${label} is not a valid date`, 400);
+  }
+
+  return date;
+};
+
+const parseMonth = (value) => {
+  if (!value) return null;
+
+  const monthText = String(value).trim();
+  if (!/^\d{4}-\d{2}$/.test(monthText)) {
+    throw new AppError('month must be in YYYY-MM format', 400);
+  }
+
+  const date = new Date(`${monthText}-01T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 7) !== monthText) {
+    throw new AppError('month is not valid', 400);
+  }
+
+  return date;
+};
+
+const buildSessionFilter = (query, userId, options = {}) => {
+  const filter = { user: userId };
+  const fromDate = parseDateOnly(query.from, 'from');
+  const toDate = parseDateOnly(query.to, 'to');
+
+  if (fromDate || toDate) {
+    filter.completedAt = {};
+
+    if (fromDate) {
+      filter.completedAt.$gte = fromDate;
+    }
+
+    if (toDate) {
+      const endDate = new Date(toDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+      filter.completedAt.$lt = endDate;
+    }
+  }
+
+  if (fromDate && toDate && fromDate > toDate) {
+    throw new AppError('from date must be before or equal to to date', 400);
+  }
+
+  if (options.includeWorkoutName && query.workoutName) {
+    const workoutName = String(query.workoutName).trim();
+    if (workoutName) {
+      filter.workoutName = new RegExp(escapeRegex(workoutName), 'i');
+    }
+  }
+
+  return filter;
+};
+
+const escapeCsvValue = (value) => {
+  if (value === null || value === undefined) return '';
+
+  const text = String(value);
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  return text;
+};
+
 const calculateCurrentStreakDays = (sessions) => {
   const sessionDays = new Set(sessions.map((session) => getDateKey(session.completedAt)));
   let currentDate = new Date();
@@ -188,13 +264,14 @@ const getSessions = async (req, res, next) => {
     const requestedLimit = parsePositiveInteger(req.query.limit, 10);
     const limit = Math.min(requestedLimit, 50);
     const skip = (page - 1) * limit;
+    const filter = buildSessionFilter(req.query, req.user._id, { includeWorkoutName: true });
 
     const [sessions, total] = await Promise.all([
-      WorkoutSession.find({ user: req.user._id })
+      WorkoutSession.find(filter)
         .sort({ completedAt: -1 })
         .skip(skip)
         .limit(limit),
-      WorkoutSession.countDocuments({ user: req.user._id }),
+      WorkoutSession.countDocuments(filter),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -209,6 +286,102 @@ const getSessions = async (req, res, next) => {
         hasPrevPage: page > 1,
       },
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const getSessionCalendar = async (req, res, next) => {
+  try {
+    const filter = { user: req.user._id };
+    const monthStart = parseMonth(req.query.month);
+
+    if (monthStart) {
+      const nextMonth = new Date(monthStart);
+      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+
+      filter.completedAt = {
+        $gte: monthStart,
+        $lt: nextMonth,
+      };
+    }
+
+    const sessions = await WorkoutSession.find(filter).sort({ completedAt: 1 });
+    const groupedByDate = sessions.reduce((groups, session) => {
+      const date = getDateKey(session.completedAt);
+
+      if (!groups[date]) {
+        groups[date] = {
+          date,
+          sessionCount: 0,
+          totalVolume: 0,
+          totalCompletedSets: 0,
+        };
+      }
+
+      groups[date].sessionCount += 1;
+      groups[date].totalVolume += session.totalVolume || 0;
+      groups[date].totalCompletedSets += session.totalCompletedSets || 0;
+
+      return groups;
+    }, {});
+
+    return sendSuccess(
+      res,
+      200,
+      'Workout session calendar fetched successfully',
+      Object.values(groupedByDate)
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const exportSessionsCsv = async (req, res, next) => {
+  try {
+    const filter = buildSessionFilter(req.query, req.user._id);
+    const sessions = await WorkoutSession.find(filter).sort({ completedAt: -1 });
+    const header = [
+      'sessionId',
+      'workoutName',
+      'completedAt',
+      'durationMinutes',
+      'exerciseName',
+      'setNumber',
+      'targetReps',
+      'actualReps',
+      'weight',
+      'completed',
+      'totalVolume',
+    ];
+
+    const rows = [header];
+
+    sessions.forEach((session) => {
+      (session.exercises || []).forEach((exercise) => {
+        (exercise.sets || []).forEach((set) => {
+          rows.push([
+            session._id,
+            session.workoutName,
+            session.completedAt ? session.completedAt.toISOString() : '',
+            session.durationMinutes,
+            exercise.name,
+            set.setNumber,
+            set.targetReps,
+            set.actualReps,
+            set.weight,
+            set.completed,
+            session.totalVolume,
+          ]);
+        });
+      });
+    });
+
+    const csv = rows.map((row) => row.map(escapeCsvValue).join(',')).join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="workoutly-sessions.csv"');
+    return res.status(200).send(`${csv}\n`);
   } catch (error) {
     return next(error);
   }
@@ -260,6 +433,8 @@ const getSessionSummary = async (req, res, next) => {
 module.exports = {
   createSession,
   getSessions,
+  getSessionCalendar,
+  exportSessionsCsv,
   getRecentSessions,
   getSessionSummary,
   getExerciseProgress,

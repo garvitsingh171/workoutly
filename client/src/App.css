@@ -1365,6 +1365,98 @@
   text-transform: capitalize;
 }
 
+/* History and Goals */
+.history-heading,
+.history-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.history-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.history-filters .ui-input-group,
+.history-month-picker,
+.goal-form__field {
+  margin-bottom: 0;
+}
+
+.history-filters__actions,
+.goal-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.history-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.history-calendar__day {
+  min-height: 86px;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--row-bg);
+}
+
+.history-calendar__day--trained {
+  border-color: rgba(var(--success-rgb), 0.38);
+  background: var(--success-soft);
+}
+
+.history-calendar__date {
+  display: block;
+  color: var(--text-strong);
+  font-weight: 850;
+}
+
+.history-calendar__summary {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.calendar-loading {
+  display: grid;
+  place-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.goal-progress {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.goal-progress__bar {
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--interactive-bg);
+}
+
+.goal-progress__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.dashboard-goal-card {
+  border-color: rgba(var(--primary-rgb), 0.3);
+}
+
 @media (max-width: 980px) {
   .home-hero,
   .dashboard-hero {
@@ -1439,6 +1531,22 @@
   .progress-search {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .history-heading,
+  .history-section-header,
+  .goal-form,
+  .history-filters__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .history-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .history-calendar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .workout-card__actions {
