@@ -2,24 +2,24 @@
   color-scheme: light;
 
   /* Colors */
-  --bg: #f6f3ee;
-  --bg-soft: #fffaf3;
-  --bg-elevated: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #f9f4ec;
-  --surface-3: #efe7dc;
+  --bg: #f2f6f8;
+  --bg-soft: #f8fafc;
+  --bg-elevated: #fbfdfd;
+  --surface: #fbfdfd;
+  --surface-2: #edf4f8;
+  --surface-3: #dbe7ef;
   --surface-elevated: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.84);
-  --surface-strong: #111827;
-  --primary: #f97316;
-  --primary-hover: #ea580c;
-  --primary-light: rgba(249, 115, 22, 0.12);
+  --surface-glass: rgba(251, 253, 253, 0.86);
+  --surface-strong: #101c28;
+  --primary: #0b72c8;
+  --primary-hover: #075c9f;
+  --primary-light: rgba(11, 114, 200, 0.12);
   --primary-soft: var(--primary-light);
-  --primary-rgb: 249, 115, 22;
-  --accent: #64748b;
-  --accent-soft: rgba(100, 116, 139, 0.12);
-  --accent-rgb: 100, 116, 139;
-  --secondary: #233044;
+  --primary-rgb: 11, 114, 200;
+  --accent: #16834a;
+  --accent-soft: rgba(22, 131, 74, 0.12);
+  --accent-rgb: 22, 131, 74;
+  --secondary: #172838;
   --success: #047857;
   --success-soft: rgba(4, 120, 87, 0.1);
   --success-rgb: 4, 120, 87;
@@ -29,63 +29,61 @@
   --danger: #be123c;
   --danger-soft: rgba(190, 18, 60, 0.1);
   --danger-rgb: 190, 18, 60;
-  --text-strong: #111827;
-  --text: #243041;
-  --text-muted: #64748b;
-  --text-faint: #8793a3;
-  --border: rgba(15, 23, 42, 0.12);
-  --border-strong: rgba(15, 23, 42, 0.2);
-  --glass-bg: rgba(255, 255, 255, 0.86);
+  --text-strong: #101c28;
+  --text: #263746;
+  --text-muted: #657585;
+  --text-faint: #8a98a6;
+  --border: rgba(16, 28, 40, 0.12);
+  --border-strong: rgba(16, 28, 40, 0.2);
+  --glass-bg: rgba(251, 253, 253, 0.88);
 
   /* Theme-aware surfaces */
-  --body-bg:
-    radial-gradient(circle at 9% -12%, rgba(var(--primary-rgb), 0.15), transparent 28rem),
-    radial-gradient(circle at 92% 0%, rgba(35, 48, 68, 0.08), transparent 24rem),
-    linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 42%, #f1ece4 100%);
-  --header-bg: rgba(255, 252, 247, 0.86);
-  --footer-bg: rgba(255, 252, 247, 0.78);
-  --surface-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 243, 0.72));
-  --surface-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(249, 244, 236, 0.62));
-  --subtle-panel: rgba(255, 255, 255, 0.62);
-  --row-bg: rgba(255, 255, 255, 0.58);
-  --row-bg-strong: rgba(255, 255, 255, 0.78);
-  --field-bg: rgba(255, 255, 255, 0.88);
+  --body-bg: linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 48%, #edf4f7 100%);
+  --header-bg: rgba(248, 250, 252, 0.9);
+  --footer-bg: rgba(248, 250, 252, 0.78);
+  --surface-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(244, 248, 251, 0.78));
+  --surface-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(237, 244, 248, 0.64));
+  --subtle-panel: rgba(244, 248, 251, 0.7);
+  --row-bg: rgba(248, 250, 252, 0.72);
+  --row-bg-strong: rgba(255, 255, 255, 0.86);
+  --field-bg: rgba(255, 255, 255, 0.9);
   --field-bg-focus: #ffffff;
   --field-bg-disabled: rgba(241, 245, 249, 0.76);
-  --interactive-bg: rgba(15, 23, 42, 0.035);
-  --interactive-bg-hover: rgba(15, 23, 42, 0.07);
+  --interactive-bg: rgba(16, 28, 40, 0.045);
+  --interactive-bg-hover: rgba(16, 28, 40, 0.08);
+  --nav-pill-bg: rgba(255, 255, 255, 0.62);
+  --nav-link-active-bg: rgba(var(--primary-rgb), 0.12);
+  --nav-link-hover-bg: rgba(var(--primary-rgb), 0.08);
+  --nav-logo-bg: rgba(255, 255, 255, 0.84);
   --hero-preview-bg:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.72)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(233, 244, 251, 0.76)),
     var(--surface);
-  --hero-preview-topbar: rgba(249, 244, 236, 0.82);
+  --hero-preview-topbar: rgba(237, 244, 248, 0.88);
   --dashboard-hero-bg:
-    radial-gradient(circle at 92% 4%, rgba(var(--primary-rgb), 0.18), transparent 18rem),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.84) 52%),
+    linear-gradient(135deg, rgba(var(--primary-rgb), 0.14), rgba(255, 255, 255, 0.92) 46%, rgba(var(--accent-rgb), 0.1)),
     var(--surface);
-  --stat-card-bg: rgba(255, 255, 255, 0.78);
-  --session-bg:
-    radial-gradient(circle at 10% 4%, rgba(var(--primary-rgb), 0.12), transparent 20rem),
-    var(--bg);
-  --session-header-bg: rgba(255, 252, 247, 0.92);
-  --session-finish-bg: rgba(255, 252, 247, 0.92);
+  --stat-card-bg: rgba(255, 255, 255, 0.8);
+  --session-bg: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+  --session-header-bg: rgba(248, 250, 252, 0.93);
+  --session-finish-bg: rgba(248, 250, 252, 0.93);
   --timer-bg: rgba(255, 255, 255, 0.96);
   --completed-row-bg: rgba(var(--success-rgb), 0.08);
   --completed-row-border: rgba(var(--success-rgb), 0.22);
-  --spinner-track: rgba(15, 23, 42, 0.12);
+  --spinner-track: rgba(16, 28, 40, 0.12);
 
   /* Components */
-  --brand-mark-text: #111827;
-  --button-primary-text: #1f1308;
-  --button-primary-bg: linear-gradient(135deg, var(--primary), #fb923c);
-  --button-primary-bg-hover: linear-gradient(135deg, var(--primary-hover), #f97316);
-  --button-secondary-bg: linear-gradient(180deg, #29384f, #1d293c);
-  --button-secondary-bg-hover: linear-gradient(180deg, #34445e, #233044);
+  --brand-mark-text: #101c28;
+  --button-primary-text: #ffffff;
+  --button-primary-bg: linear-gradient(135deg, var(--primary-hover), var(--primary));
+  --button-primary-bg-hover: linear-gradient(135deg, #064b85, var(--primary-hover));
+  --button-secondary-bg: linear-gradient(180deg, #20364a, #172838);
+  --button-secondary-bg-hover: linear-gradient(180deg, #28435a, #20364a);
   --button-secondary-text: #ffffff;
   --button-danger-bg: linear-gradient(135deg, #be123c, #e11d48);
   --button-danger-bg-hover: linear-gradient(135deg, #e11d48, #fb7185);
   --button-danger-text: #fff7f8;
-  --button-ghost-bg: rgba(255, 255, 255, 0.52);
-  --button-ghost-bg-hover: rgba(255, 255, 255, 0.86);
+  --button-ghost-bg: rgba(255, 255, 255, 0.58);
+  --button-ghost-bg-hover: rgba(255, 255, 255, 0.9);
   --complete-btn-done-text: #ecfdf5;
 
   /* Typography */
@@ -111,10 +109,10 @@
   --radius-full: 999px;
 
   /* Effects */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 14px 30px rgba(15, 23, 42, 0.12);
-  --shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.16);
-  --shadow-card: 0 18px 42px rgba(15, 23, 42, 0.1);
+  --shadow-sm: 0 1px 2px rgba(16, 28, 40, 0.08);
+  --shadow-md: 0 12px 26px rgba(16, 28, 40, 0.1);
+  --shadow-lg: 0 24px 62px rgba(16, 28, 40, 0.14);
+  --shadow-card: 0 18px 42px rgba(16, 28, 40, 0.09);
   --shadow-primary: 0 14px 30px rgba(var(--primary-rgb), 0.24);
   --focus-ring: 0 0 0 3px rgba(var(--primary-rgb), 0.28);
   --transition-fast: 160ms ease;
@@ -124,24 +122,24 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #070b12;
-  --bg-soft: #0b111c;
-  --bg-elevated: #111827;
-  --surface: #111827;
-  --surface-2: #151f2e;
-  --surface-3: #1d293a;
-  --surface-elevated: #172131;
-  --surface-glass: rgba(17, 24, 39, 0.82);
+  --bg: #07111a;
+  --bg-soft: #0a1621;
+  --bg-elevated: #101d29;
+  --surface: #101d29;
+  --surface-2: #132433;
+  --surface-3: #183047;
+  --surface-elevated: #142333;
+  --surface-glass: rgba(16, 29, 41, 0.84);
   --surface-strong: #f8fafc;
-  --primary: #ff6b1a;
-  --primary-hover: #ff8a3d;
-  --primary-light: rgba(255, 107, 26, 0.14);
+  --primary: #38aef8;
+  --primary-hover: #6bc7ff;
+  --primary-light: rgba(56, 174, 248, 0.16);
   --primary-soft: var(--primary-light);
-  --primary-rgb: 255, 107, 26;
-  --accent: #c7f458;
-  --accent-soft: rgba(199, 244, 88, 0.14);
-  --accent-rgb: 199, 244, 88;
-  --secondary: #253247;
+  --primary-rgb: 56, 174, 248;
+  --accent: #7ee787;
+  --accent-soft: rgba(126, 231, 135, 0.14);
+  --accent-rgb: 126, 231, 135;
+  --secondary: #1b3043;
   --success: #34d399;
   --success-soft: rgba(52, 211, 153, 0.14);
   --success-rgb: 52, 211, 153;
@@ -152,54 +150,52 @@
   --danger-soft: rgba(251, 113, 133, 0.14);
   --danger-rgb: 251, 113, 133;
   --text-strong: #f8fafc;
-  --text: #dbe4f0;
-  --text-muted: #aeb9c9;
-  --text-faint: #8290a3;
-  --border: rgba(148, 163, 184, 0.2);
-  --border-strong: rgba(248, 250, 252, 0.25);
-  --glass-bg: rgba(17, 24, 39, 0.86);
+  --text: #d8e4ef;
+  --text-muted: #a8b7c5;
+  --text-faint: #7f91a3;
+  --border: rgba(148, 178, 202, 0.2);
+  --border-strong: rgba(226, 241, 255, 0.26);
+  --glass-bg: rgba(16, 29, 41, 0.88);
 
-  --body-bg:
-    radial-gradient(circle at 8% -10%, rgba(var(--primary-rgb), 0.18), transparent 26rem),
-    radial-gradient(circle at 95% 0%, rgba(var(--accent-rgb), 0.1), transparent 24rem),
-    linear-gradient(180deg, var(--bg), #080d16 48%, var(--bg));
-  --header-bg: rgba(7, 11, 18, 0.84);
-  --footer-bg: rgba(7, 11, 18, 0.7);
-  --surface-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012));
-  --surface-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
-  --subtle-panel: rgba(7, 11, 18, 0.38);
-  --row-bg: rgba(7, 11, 18, 0.38);
-  --row-bg-strong: rgba(7, 11, 18, 0.58);
-  --field-bg: rgba(7, 11, 18, 0.64);
-  --field-bg-focus: rgba(7, 11, 18, 0.9);
-  --field-bg-disabled: rgba(17, 24, 39, 0.42);
+  --body-bg: linear-gradient(180deg, #07111a 0%, #0a1621 48%, #07111a 100%);
+  --header-bg: rgba(7, 17, 26, 0.88);
+  --footer-bg: rgba(7, 17, 26, 0.72);
+  --surface-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+  --surface-gradient-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  --subtle-panel: rgba(7, 17, 26, 0.44);
+  --row-bg: rgba(7, 17, 26, 0.42);
+  --row-bg-strong: rgba(7, 17, 26, 0.62);
+  --field-bg: rgba(7, 17, 26, 0.66);
+  --field-bg-focus: rgba(7, 17, 26, 0.92);
+  --field-bg-disabled: rgba(16, 29, 41, 0.48);
   --interactive-bg: rgba(255, 255, 255, 0.03);
   --interactive-bg-hover: rgba(255, 255, 255, 0.07);
+  --nav-pill-bg: rgba(255, 255, 255, 0.045);
+  --nav-link-active-bg: rgba(var(--primary-rgb), 0.16);
+  --nav-link-hover-bg: rgba(var(--primary-rgb), 0.1);
+  --nav-logo-bg: rgba(255, 255, 255, 0.08);
   --hero-preview-bg:
     linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
-    rgba(17, 24, 39, 0.88);
-  --hero-preview-topbar: rgba(7, 11, 18, 0.42);
+    rgba(16, 29, 41, 0.9);
+  --hero-preview-topbar: rgba(7, 17, 26, 0.48);
   --dashboard-hero-bg:
-    radial-gradient(circle at 90% 10%, rgba(var(--accent-rgb), 0.14), transparent 18rem),
-    linear-gradient(135deg, rgba(var(--primary-rgb), 0.22), rgba(17, 24, 39, 0.92) 46%),
+    linear-gradient(135deg, rgba(var(--primary-rgb), 0.24), rgba(16, 29, 41, 0.94) 48%, rgba(var(--accent-rgb), 0.12)),
     var(--surface);
-  --stat-card-bg: rgba(17, 24, 39, 0.72);
-  --session-bg:
-    radial-gradient(circle at 10% 4%, rgba(var(--primary-rgb), 0.12), transparent 20rem),
-    var(--bg);
-  --session-header-bg: rgba(7, 11, 18, 0.9);
-  --session-finish-bg: rgba(7, 11, 18, 0.92);
-  --timer-bg: rgba(17, 24, 39, 0.94);
+  --stat-card-bg: rgba(16, 29, 41, 0.74);
+  --session-bg: linear-gradient(180deg, #0a1621 0%, var(--bg) 100%);
+  --session-header-bg: rgba(7, 17, 26, 0.92);
+  --session-finish-bg: rgba(7, 17, 26, 0.94);
+  --timer-bg: rgba(16, 29, 41, 0.95);
   --completed-row-bg: rgba(var(--success-rgb), 0.08);
   --completed-row-border: rgba(var(--success-rgb), 0.22);
   --spinner-track: rgba(255, 255, 255, 0.12);
 
   --brand-mark-text: #10151e;
-  --button-primary-text: #120906;
-  --button-primary-bg: linear-gradient(135deg, var(--primary), #ff8f3f);
-  --button-primary-bg-hover: linear-gradient(135deg, var(--primary-hover), #ffad66);
+  --button-primary-text: #03111c;
+  --button-primary-bg: linear-gradient(135deg, var(--primary), #78d4ff);
+  --button-primary-bg-hover: linear-gradient(135deg, var(--primary-hover), #9addff);
   --button-secondary-bg: linear-gradient(180deg, var(--surface-3), var(--secondary));
-  --button-secondary-bg-hover: linear-gradient(180deg, #2d3b52, #1f2b3e);
+  --button-secondary-bg-hover: linear-gradient(180deg, #21445f, #1a354d);
   --button-secondary-text: #f8fafc;
   --button-danger-bg: linear-gradient(135deg, #f43f5e, var(--danger));
   --button-danger-bg-hover: linear-gradient(135deg, #fb7185, #fda4af);

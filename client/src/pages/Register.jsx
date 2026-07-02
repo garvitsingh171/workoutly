@@ -128,6 +128,10 @@ const Register = () => {
   return (
     <section className="page page-auth">
       <div className="panel panel-auth">
+        <div className="auth-brand">
+          <img src="/workoutly.png" alt="Workoutly logo" className="auth-brand__logo" />
+          <span>Workoutly</span>
+        </div>
         <h1 className="panel-title">Create Your Account</h1>
         <p className="panel-subtitle">Join Workoutly and start working out today</p>
 
