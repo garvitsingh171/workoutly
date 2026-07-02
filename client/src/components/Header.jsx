@@ -1,46 +1,77 @@
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './ui/Button';
 import ThemeToggle from './common/ThemeToggle';
 
+const authenticatedNavItems = [
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/history', label: 'History' },
+  { to: '/goals', label: 'Goals' },
+  { to: '/progress', label: 'Progress' },
+  { to: '/records', label: 'Records' },
+  { to: '/exercises', label: 'Exercises' },
+];
+
+const getNavLinkClassName = ({ isActive }) =>
+  `site-header__link ${isActive ? 'site-header__link--active' : ''}`.trim();
+
 const Header = () => {
   const { isAuthenticated, logout, user } = useAuth();
   const firstName = user?.name?.split(' ')[0];
+  const userInitial = firstName?.charAt(0)?.toUpperCase();
+  const authenticated = isAuthenticated();
 
   return (
     <header className="site-header">
-      <div className="site-header__logo-wrap">
+      <div className="site-header__inner">
         <Link to="/" className="site-header__logo-link">
-          <span className="site-header__logo-mark" aria-hidden="true">W</span>
-          <span>Workoutly</span>
+          <img
+            src="/workoutly.png"
+            alt="Workoutly logo"
+            className="site-header__logo-img"
+            width="40"
+            height="40"
+          />
+          <span className="site-header__brand-text">Workoutly</span>
         </Link>
-      </div>
 
-      <nav className="site-header__nav">
-        {isAuthenticated() ? (
-          <>
-            <Link to="/dashboard" className="site-header__link">Dashboard</Link>
-            <Link to="/history" className="site-header__link">History</Link>
-            <Link to="/goals" className="site-header__link">Goals</Link>
-            <Link to="/progress" className="site-header__link">Progress</Link>
-            <Link to="/records" className="site-header__link">Records</Link>
-            <Link to="/exercises" className="site-header__link">Exercises</Link>
-            {firstName && <span className="site-header__user-text">Hi, {firstName}</span>}
-            <ThemeToggle />
-            <button onClick={logout} className="site-header__logout-btn">
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="site-header__link">Login</Link>
-            <ThemeToggle />
-            <Button as={Link} to="/register" variant="primary" size="sm">
-              Register
-            </Button>
-          </>
-        )}
-      </nav>
+        <nav className="site-header__nav" aria-label="Primary navigation">
+          {authenticated ? (
+            <>
+              <div className="site-header__primary-links">
+                {authenticatedNavItems.map((item) => (
+                  <NavLink key={item.to} to={item.to} className={getNavLinkClassName}>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+
+              <div className="site-header__actions">
+                {firstName && (
+                  <span className="site-header__user-text">
+                    {userInitial && <span className="site-header__user-avatar" aria-hidden="true">{userInitial}</span>}
+                    <span>Hi, {firstName}</span>
+                  </span>
+                )}
+                <ThemeToggle />
+                <button onClick={logout} className="site-header__logout-btn">
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="site-header__actions site-header__actions--guest">
+              <NavLink to="/login" className={getNavLinkClassName}>
+                Login
+              </NavLink>
+              <ThemeToggle />
+              <Button as={Link} to="/register" variant="primary" size="sm">
+                Register
+              </Button>
+            </div>
+          )}
+        </nav>
+      </div>
     </header>
   );
 };

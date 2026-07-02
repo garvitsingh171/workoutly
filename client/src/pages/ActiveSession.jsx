@@ -168,7 +168,8 @@ const ActiveSession = () => {
   if (loading) {
     return (
       <div className="page-state">
-        <p>Loading session...</p>
+        <div className="loading-spinner" aria-hidden="true"></div>
+        <p className="loading-spinner__text">Loading session...</p>
       </div>
     );
   }

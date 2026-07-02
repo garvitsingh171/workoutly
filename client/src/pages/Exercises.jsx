@@ -208,9 +208,14 @@ const Exercises = () => {
               </div>
 
               {loading ? (
-                <p className="dashboard-subtext">Loading exercises...</p>
+                <div className="inline-state" role="status" aria-live="polite">
+                  <div className="loading-spinner loading-spinner--sm" aria-hidden="true"></div>
+                  <span>Loading exercises...</span>
+                </div>
               ) : exercises.length === 0 ? (
-                <p className="dashboard-subtext">No exercises found.</p>
+                <div className="inline-state">
+                  <span>No exercises found. Try clearing a filter or adding your own movement.</span>
+                </div>
               ) : (
                 <div className="exercise-library-list">
                   {exercises.map((exercise) => (

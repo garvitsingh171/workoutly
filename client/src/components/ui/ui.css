@@ -18,6 +18,7 @@
   white-space: nowrap;
   cursor: pointer;
   touch-action: manipulation;
+  user-select: none;
   transition:
     transform var(--transition-fast),
     background var(--transition-fast),
@@ -151,6 +152,7 @@
   font-family: var(--font-body);
   font-size: 0.95rem;
   outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
   transition:
     background var(--transition-fast),
     border-color var(--transition-fast),
@@ -211,6 +213,9 @@ select.ui-input {
     var(--surface-gradient),
     var(--surface);
   box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .ui-card__header {

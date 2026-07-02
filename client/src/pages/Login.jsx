@@ -100,6 +100,10 @@ const Login = () => {
   return (
     <section className="page page-auth">
       <div className="panel panel-auth">
+        <div className="auth-brand">
+          <img src="/workoutly.png" alt="Workoutly logo" className="auth-brand__logo" />
+          <span>Workoutly</span>
+        </div>
         <h1 className="panel-title">Welcome Back</h1>
         <p className="panel-subtitle">Login to continue your fitness journey</p>
 

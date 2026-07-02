@@ -149,7 +149,8 @@ const EditWorkout = () => {
   if (isLoading) {
     return (
       <div className="page-state">
-        <p>Loading workout...</p>
+        <div className="loading-spinner" aria-hidden="true"></div>
+        <p className="loading-spinner__text">Loading workout...</p>
       </div>
     );
   }

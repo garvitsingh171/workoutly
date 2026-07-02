@@ -208,7 +208,8 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="page-state">
-        <p>Loading...</p>
+        <div className="loading-spinner" aria-hidden="true"></div>
+        <p className="loading-spinner__text">Loading dashboard...</p>
       </div>
     );
   }
