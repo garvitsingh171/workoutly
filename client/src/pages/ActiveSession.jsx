@@ -176,6 +176,13 @@ const ActiveSession = () => {
 
   if (!workout) return null;
 
+  const totalSets = sessionData.reduce((count, exercise) => count + exercise.setLogs.length, 0);
+  const completedSets = sessionData.reduce(
+    (count, exercise) => count + exercise.setLogs.filter((log) => log.completed).length,
+    0
+  );
+  const sessionProgress = totalSets ? Math.round((completedSets / totalSets) * 100) : 0;
+
   return (
     <div className="active-session">
       <header className="session-header">
@@ -184,8 +191,11 @@ const ActiveSession = () => {
             <Badge color="accent">Active Session</Badge>
             <h1>{workout.name}</h1>
             <p className="session-header__meta">
-              {sessionData.length} exercises • {workout.duration || 0} minute routine
+              {sessionData.length} exercises • {completedSets} of {totalSets} sets complete • {workout.duration || 0} minute routine
             </p>
+            <div className="session-header__progress" aria-label={`Session progress ${sessionProgress}%`}>
+              <span style={{ width: `${sessionProgress}%` }} />
+            </div>
           </div>
           <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
             Exit
