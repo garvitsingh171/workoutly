@@ -7,12 +7,13 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
 import Badge from "../components/ui/Badge";
+import { validateWorkoutForm } from "../utils/workoutFormValidation";
 
-const defaultExercise = {
+const createDefaultExercise = () => ({
   name: "",
   sets: 3,
   reps: 10,
-};
+});
 
 const CreateWorkout = () => {
   const navigate = useNavigate();
@@ -21,8 +22,9 @@ const CreateWorkout = () => {
     duration: 45,
     difficulty: "beginner",
     notes: "",
-    exercises: [defaultExercise],
+    exercises: [createDefaultExercise()],
   });
+  const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -45,10 +47,28 @@ const CreateWorkout = () => {
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
+    setError("");
+    setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleExerciseChange = (index, key, value) => {
+    setError("");
+    setFormErrors((prev) => {
+      const updatedExerciseErrors = [...(prev.exercises || [])];
+      if (updatedExerciseErrors[index]) {
+        updatedExerciseErrors[index] = {
+          ...updatedExerciseErrors[index],
+          [key]: undefined,
+        };
+      }
+
+      return {
+        ...prev,
+        exercises: updatedExerciseErrors,
+      };
+    });
+
     setFormData((prev) => {
       const updatedExercises = [...prev.exercises];
       updatedExercises[index] = {
@@ -65,7 +85,7 @@ const CreateWorkout = () => {
   const handleAddExercise = () => {
     setFormData((prev) => ({
       ...prev,
-      exercises: [...prev.exercises, defaultExercise],
+      exercises: [...prev.exercises, createDefaultExercise()],
     }));
   };
 
@@ -109,9 +129,19 @@ const CreateWorkout = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setFormErrors({});
 
     if (isUploadingImage) {
       toast.error("Please wait for the image upload to complete.");
+      return;
+    }
+
+    const validation = validateWorkoutForm(formData);
+    if (!validation.isValid) {
+      const message = "Fix the highlighted fields before saving this workout.";
+      setFormErrors(validation.errors);
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -119,6 +149,8 @@ const CreateWorkout = () => {
 
     const payload = {
       ...formData,
+      name: formData.name.trim(),
+      notes: formData.notes.trim(),
       coverImage: uploadedImage?.url || null,
       duration: Number.parseInt(formData.duration, 10),
       exercises: formData.exercises.map((exercise) => ({
@@ -166,6 +198,7 @@ const CreateWorkout = () => {
                 placeholder="e.g., Push Day, Leg Strength, HIIT Burn"
                 value={formData.name}
                 onChange={handleFieldChange}
+                error={formErrors.name}
                 required
               />
 
@@ -178,6 +211,7 @@ const CreateWorkout = () => {
                   max="600"
                   value={formData.duration}
                   onChange={handleFieldChange}
+                  error={formErrors.duration}
                   required
                 />
 
@@ -250,59 +284,87 @@ const CreateWorkout = () => {
               </div>
 
               <div className="exercise-list">
-                {formData.exercises.map((exercise, index) => (
-                  <div key={`exercise-${index}`} className="workout-exercise-row">
-                    <div className="ui-input-group ui-input-group--compact">
-                      <label className="ui-label" htmlFor={`exercise-name-${index}`}>Name</label>
-                      <input
-                        id={`exercise-name-${index}`}
-                        className="ui-input"
-                        type="text"
-                        list="exercise-library-options"
-                        value={exercise.name}
-                        onChange={(e) => handleExerciseChange(index, "name", e.target.value)}
-                        placeholder="e.g. Squat"
-                        required
-                      />
+                {formData.exercises.map((exercise, index) => {
+                  const exerciseErrors = formErrors.exercises?.[index] || {};
+                  const nameErrorId = exerciseErrors.name ? `exercise-name-${index}-error` : undefined;
+                  const setsErrorId = exerciseErrors.sets ? `exercise-sets-${index}-error` : undefined;
+                  const repsErrorId = exerciseErrors.reps ? `exercise-reps-${index}-error` : undefined;
+
+                  return (
+                    <div key={`exercise-${index}`} className="workout-exercise-row">
+                      <div className="ui-input-group ui-input-group--compact">
+                        <label className="ui-label" htmlFor={`exercise-name-${index}`}>Name</label>
+                        <input
+                          id={`exercise-name-${index}`}
+                          className={`ui-input ${exerciseErrors.name ? "ui-input--error" : ""}`.trim()}
+                          type="text"
+                          list="exercise-library-options"
+                          value={exercise.name}
+                          onChange={(e) => handleExerciseChange(index, "name", e.target.value)}
+                          placeholder="e.g. Squat"
+                          aria-invalid={exerciseErrors.name ? "true" : undefined}
+                          aria-describedby={nameErrorId}
+                          required
+                        />
+                        {exerciseErrors.name && (
+                          <span id={nameErrorId} className="ui-error-text" role="alert">
+                            {exerciseErrors.name}
+                          </span>
+                        )}
+                      </div>
+                      <div className="ui-input-group ui-input-group--compact">
+                        <label className="ui-label" htmlFor={`exercise-sets-${index}`}>Sets</label>
+                        <input
+                          id={`exercise-sets-${index}`}
+                          className={`ui-input ${exerciseErrors.sets ? "ui-input--error" : ""}`.trim()}
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={exercise.sets}
+                          onChange={(e) => handleExerciseChange(index, "sets", e.target.value)}
+                          aria-invalid={exerciseErrors.sets ? "true" : undefined}
+                          aria-describedby={setsErrorId}
+                          required
+                        />
+                        {exerciseErrors.sets && (
+                          <span id={setsErrorId} className="ui-error-text" role="alert">
+                            {exerciseErrors.sets}
+                          </span>
+                        )}
+                      </div>
+                      <div className="ui-input-group ui-input-group--compact">
+                        <label className="ui-label" htmlFor={`exercise-reps-${index}`}>Reps</label>
+                        <input
+                          id={`exercise-reps-${index}`}
+                          className={`ui-input ${exerciseErrors.reps ? "ui-input--error" : ""}`.trim()}
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={exercise.reps}
+                          onChange={(e) => handleExerciseChange(index, "reps", e.target.value)}
+                          aria-invalid={exerciseErrors.reps ? "true" : undefined}
+                          aria-describedby={repsErrorId}
+                          required
+                        />
+                        {exerciseErrors.reps && (
+                          <span id={repsErrorId} className="ui-error-text" role="alert">
+                            {exerciseErrors.reps}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="workout-exercise-row__remove"
+                        onClick={() => handleRemoveExercise(index)}
+                        disabled={formData.exercises.length === 1}
+                        aria-label={`Remove exercise ${index + 1}`}
+                      >
+                        Remove
+                      </Button>
                     </div>
-                    <div className="ui-input-group ui-input-group--compact">
-                      <label className="ui-label" htmlFor={`exercise-sets-${index}`}>Sets</label>
-                      <input
-                        id={`exercise-sets-${index}`}
-                        className="ui-input"
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={exercise.sets}
-                        onChange={(e) => handleExerciseChange(index, "sets", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="ui-input-group ui-input-group--compact">
-                      <label className="ui-label" htmlFor={`exercise-reps-${index}`}>Reps</label>
-                      <input
-                        id={`exercise-reps-${index}`}
-                        className="ui-input"
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={exercise.reps}
-                        onChange={(e) => handleExerciseChange(index, "reps", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="workout-exercise-row__remove"
-                      onClick={() => handleRemoveExercise(index)}
-                      disabled={formData.exercises.length === 1}
-                      aria-label={`Remove exercise ${index + 1}`}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <datalist id="exercise-library-options">
                 {exerciseOptions.map((option) => (

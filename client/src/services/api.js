@@ -7,6 +7,14 @@ export const getErrorMessage = (error, fallbackMessage = 'Something went wrong. 
     return error.response.data.message;
   }
 
+  if (error?.code === 'ECONNABORTED') {
+    return 'The request timed out. Please try again.';
+  }
+
+  if (error?.request && !error?.response) {
+    return fallbackMessage;
+  }
+
   if (error?.message) {
     return error.message;
   }

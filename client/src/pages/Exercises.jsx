@@ -24,6 +24,7 @@ const Exercises = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -52,16 +53,29 @@ const Exercises = () => {
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
+    setFormError('');
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const trimmedName = formData.name.trim();
+
+    if (!trimmedName) {
+      setFormError('Exercise name is required.');
+      return;
+    }
+
     setSaving(true);
     setError('');
+    setFormError('');
 
     try {
-      const response = await api.post('/api/exercises', formData);
+      const response = await api.post('/api/exercises', {
+        ...formData,
+        name: trimmedName,
+        instructions: formData.instructions.trim(),
+      });
       setExercises((prev) => [...prev, response.data.data].sort((a, b) => a.name.localeCompare(b.name)));
       setFormData({
         name: '',
@@ -101,13 +115,21 @@ const Exercises = () => {
                   <label htmlFor="exercise-library-name" className="ui-label">Name</label>
                   <input
                     id="exercise-library-name"
-                    className="ui-input"
+                    className={`ui-input ${formError ? 'ui-input--error' : ''}`.trim()}
                     name="name"
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Incline Dumbbell Press"
+                    aria-invalid={formError ? 'true' : undefined}
+                    aria-describedby={formError ? 'exercise-library-name-error' : undefined}
+                    disabled={saving}
                     required
                   />
+                  {formError && (
+                    <span id="exercise-library-name-error" className="ui-error-text" role="alert">
+                      {formError}
+                    </span>
+                  )}
                 </div>
 
                 <div className="form-grid form-grid--two">
@@ -119,6 +141,7 @@ const Exercises = () => {
                       name="category"
                       value={formData.category}
                       onChange={handleFormChange}
+                      disabled={saving}
                     >
                       {categories.map((option) => (
                         <option key={option} value={option}>{labelize(option)}</option>
@@ -134,6 +157,7 @@ const Exercises = () => {
                       name="equipment"
                       value={formData.equipment}
                       onChange={handleFormChange}
+                      disabled={saving}
                     >
                       {equipmentOptions.map((option) => (
                         <option key={option} value={option}>{labelize(option)}</option>
@@ -151,6 +175,7 @@ const Exercises = () => {
                     value={formData.instructions}
                     onChange={handleFormChange}
                     rows="3"
+                    disabled={saving}
                   />
                 </div>
 

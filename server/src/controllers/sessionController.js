@@ -184,6 +184,10 @@ const createSession = async (req, res, next) => {
 
     const normalized = normalizeExercises(req.body.exercises);
 
+    if (normalized.totalCompletedSets === 0) {
+      throw new AppError('Complete at least one set before saving a session', 400);
+    }
+
     const session = await WorkoutSession.create({
       user: req.user._id,
       workout: workout._id,
@@ -339,7 +343,7 @@ const getSessionCalendar = async (req, res, next) => {
 
 const exportSessionsCsv = async (req, res, next) => {
   try {
-    const filter = buildSessionFilter(req.query, req.user._id);
+    const filter = buildSessionFilter(req.query, req.user._id, { includeWorkoutName: true });
     const sessions = await WorkoutSession.find(filter).sort({ completedAt: -1 });
     const header = [
       'sessionId',

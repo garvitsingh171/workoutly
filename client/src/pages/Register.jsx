@@ -23,6 +23,12 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    setApiError("");
+    setSuccessMessage("");
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -44,7 +50,7 @@ const Register = () => {
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = "Please enter a valid email address";
     }
 
@@ -125,6 +131,8 @@ const Register = () => {
     }
   };
 
+  const isFormLocked = isLoading || Boolean(successMessage);
+
   return (
     <section className="page page-auth">
       <div className="panel panel-auth">
@@ -152,7 +160,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Enter your full name"
             error={errors.name}
-            disabled={isLoading}
+            disabled={isFormLocked}
           />
 
           <Input
@@ -164,7 +172,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Enter your email"
             error={errors.email}
-            disabled={isLoading}
+            disabled={isFormLocked}
           />
 
           <Input
@@ -176,7 +184,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Create a password (min 6 characters)"
             error={errors.password}
-            disabled={isLoading}
+            disabled={isFormLocked}
           />
 
           <Input
@@ -188,14 +196,14 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Re-enter your password"
             error={errors.confirmPassword}
-            disabled={isLoading}
+            disabled={isFormLocked}
           />
 
           <Button
             type="submit"
             variant="primary"
             fullWidth
-            disabled={isLoading}
+            disabled={isFormLocked}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
           </Button>

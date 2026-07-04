@@ -1560,6 +1560,14 @@
   margin: 0 auto;
 }
 
+.session-finish-bar__hint {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* Utility Cards */
 .connection-card,
 .not-found-wrap {

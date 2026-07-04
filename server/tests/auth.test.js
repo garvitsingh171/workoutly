@@ -470,6 +470,25 @@ describe('Workout Session Routes', () => {
     expect(res.body.data).toHaveProperty('totalVolume', 130);
   });
 
+  test('should reject a session with no completed sets', async () => {
+    const user = await registerTestUser('session-empty@example.com');
+    const workoutRes = await createWorkoutForUser(user, 'Empty Session Workout');
+    const payload = validSessionPayload(workoutRes.body.data._id);
+    payload.exercises[0].sets = payload.exercises[0].sets.map((set) => ({
+      ...set,
+      completed: false,
+    }));
+
+    const res = await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(payload);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('success', false);
+    expect(res.body.message).toContain('at least one set');
+  });
+
   test('should not create a session for another user workout', async () => {
     const firstUser = await registerTestUser('session-blocked@example.com');
     const secondUser = await registerTestUser('session-owner@example.com');
@@ -634,6 +653,30 @@ describe('Workout Session Routes', () => {
     expect(rows).toHaveLength(3);
     expect(res.text).toContain('CSV Owner');
     expect(res.text).not.toContain('CSV Other');
+  });
+
+  test('should filter CSV exports by workout name', async () => {
+    const user = await registerTestUser('csv-filter@example.com');
+    const pushWorkoutRes = await createWorkoutForUser(user, 'CSV Push');
+    const pullWorkoutRes = await createWorkoutForUser(user, 'CSV Pull');
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(pushWorkoutRes.body.data._id));
+
+    await request(app)
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send(validSessionPayload(pullWorkoutRes.body.data._id));
+
+    const res = await request(app)
+      .get('/api/sessions/export.csv?workoutName=push')
+      .set('Authorization', `Bearer ${user.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('CSV Push');
+    expect(res.text).not.toContain('CSV Pull');
   });
 
   test('should return real summary totals', async () => {

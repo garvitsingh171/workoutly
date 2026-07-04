@@ -48,7 +48,7 @@ const Header = () => {
   return (
     <header className={`site-header ${isMenuOpen ? 'site-header--menu-open' : ''}`.trim()}>
       <div className="site-header__inner">
-        <Link to="/" className="site-header__logo-link">
+        <Link to="/" className="site-header__logo-link" onClick={() => setOpenMenuPath(null)}>
           <img
             src="/workoutly.png"
             alt=""
@@ -87,7 +87,12 @@ const Header = () => {
             <>
               <div className="site-header__primary-links">
                 {authenticatedNavItems.map((item) => (
-                  <NavLink key={item.to} to={item.to} className={getNavLinkClassName}>
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={getNavLinkClassName}
+                    onClick={() => setOpenMenuPath(null)}
+                  >
                     {item.label}
                   </NavLink>
                 ))}
@@ -101,18 +106,18 @@ const Header = () => {
                   </span>
                 )}
                 <ThemeToggle />
-                <button onClick={handleLogout} className="site-header__logout-btn">
+                <button type="button" onClick={handleLogout} className="site-header__logout-btn">
                   Logout
                 </button>
               </div>
             </>
           ) : (
             <div className="site-header__actions site-header__actions--guest">
-              <NavLink to="/login" className={getNavLinkClassName}>
+              <NavLink to="/login" className={getNavLinkClassName} onClick={() => setOpenMenuPath(null)}>
                 Login
               </NavLink>
               <ThemeToggle />
-              <Button as={Link} to="/register" variant="primary" size="sm">
+              <Button as={Link} to="/register" variant="primary" size="sm" onClick={() => setOpenMenuPath(null)}>
                 Register
               </Button>
             </div>
