@@ -117,6 +117,18 @@ const ActiveSession = () => {
 
   const finishWorkout = async () => {
     setSaveError('');
+
+    const hasCompletedSet = sessionData.some((exercise) =>
+      exercise.setLogs.some((log) => log.completed)
+    );
+
+    if (!hasCompletedSet) {
+      const message = 'Mark at least one set complete before finishing this workout.';
+      setSaveError(message);
+      toast.error(message);
+      return;
+    }
+
     setIsSaving(true);
 
     const completedAt = new Date();
@@ -236,6 +248,8 @@ const ActiveSession = () => {
                       id={`weight-${exIndex}-${setIndex}`}
                       type="number"
                       inputMode="decimal"
+                      min="0"
+                      step="0.5"
                       placeholder="-"
                       value={log.weight}
                       onChange={(event) => handleLogChange(exIndex, setIndex, 'weight', event.target.value)}
@@ -252,6 +266,8 @@ const ActiveSession = () => {
                       id={`reps-${exIndex}-${setIndex}`}
                       type="number"
                       inputMode="numeric"
+                      min="0"
+                      max="100"
                       value={log.reps}
                       onChange={(event) => handleLogChange(exIndex, setIndex, 'reps', event.target.value)}
                       disabled={log.completed}
@@ -289,7 +305,10 @@ const ActiveSession = () => {
 
       <div className="session-finish-bar">
         <div className="session-finish-bar__inner">
-          <Button variant="primary" fullWidth size="lg" onClick={finishWorkout} disabled={isSaving}>
+          {completedSets === 0 && (
+            <p className="session-finish-bar__hint">Mark at least one set complete to finish.</p>
+          )}
+          <Button variant="primary" fullWidth size="lg" onClick={finishWorkout} disabled={isSaving || completedSets === 0}>
             {isSaving ? 'Saving Workout...' : 'Finish Workout'}
           </Button>
         </div>

@@ -48,21 +48,9 @@ const Dashboard = () => {
   useEffect(() => {
     socket.connect();
 
-    socket.on('connect', () => {
-      console.log('🔌 Socket connected:', socket.id)
-    })
-
-    socket.on('disconnect', (reason) => {
-      console.log('❌ Socket disconnected:', reason)
-    })
-
-    socket.on('connect_error', (error) => {
-      console.error('Socket auth error:', error.message)
-    })
+    socket.on('connect_error', () => {});
 
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
       socket.off('connect_error');
       socket.disconnect();
     };

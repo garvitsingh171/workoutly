@@ -141,6 +141,15 @@ const History = () => {
 
   const handleFilterSubmit = (event) => {
     event.preventDefault();
+
+    if (filters.from && filters.to && filters.from > filters.to) {
+      const message = 'From date must be before or equal to To date.';
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    setError('');
     setCurrentPage(1);
     setAppliedFilters(filters);
   };
@@ -149,6 +158,7 @@ const History = () => {
     const emptyFilters = { from: '', to: '', workoutName: '' };
     setFilters(emptyFilters);
     setAppliedFilters(emptyFilters);
+    setError('');
     setCurrentPage(1);
   };
 
@@ -161,8 +171,11 @@ const History = () => {
     setExporting(true);
 
     const params = new URLSearchParams();
-    if (filters.from) params.set('from', filters.from);
-    if (filters.to) params.set('to', filters.to);
+    if (appliedFilters.from) params.set('from', appliedFilters.from);
+    if (appliedFilters.to) params.set('to', appliedFilters.to);
+    if (appliedFilters.workoutName.trim()) {
+      params.set('workoutName', appliedFilters.workoutName.trim());
+    }
 
     try {
       const response = await api.get(`/api/sessions/export.csv?${params.toString()}`, {

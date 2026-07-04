@@ -20,6 +20,7 @@ const Goals = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [targetError, setTargetError] = useState('');
   const [success, setSuccess] = useState('');
 
   const fetchSummary = useCallback(async () => {
@@ -49,13 +50,21 @@ const Goals = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSaving(true);
     setError('');
+    setTargetError('');
     setSuccess('');
+
+    const nextTarget = Number(targetInput);
+    if (!Number.isInteger(nextTarget) || nextTarget < 1 || nextTarget > 14) {
+      setTargetError('Weekly target must be a whole number between 1 and 14.');
+      return;
+    }
+
+    setSaving(true);
 
     try {
       await api.put('/api/goals/current', {
-        weeklyWorkoutTarget: Number(targetInput),
+        weeklyWorkoutTarget: nextTarget,
       });
       await fetchSummary();
       setSuccess('Weekly target updated.');
@@ -139,14 +148,26 @@ const Goals = () => {
                 <label htmlFor="weekly-target" className="ui-label">Weekly Workout Target</label>
                 <input
                   id="weekly-target"
-                  className="ui-input"
+                  className={`ui-input ${targetError ? 'ui-input--error' : ''}`.trim()}
                   type="number"
                   min="1"
                   max="14"
                   step="1"
                   value={targetInput}
-                  onChange={(event) => setTargetInput(event.target.value)}
+                  onChange={(event) => {
+                    setTargetInput(event.target.value);
+                    setTargetError('');
+                    setSuccess('');
+                  }}
+                  aria-invalid={targetError ? 'true' : undefined}
+                  aria-describedby={targetError ? 'weekly-target-error' : undefined}
+                  disabled={saving}
                 />
+                {targetError && (
+                  <span id="weekly-target-error" className="ui-error-text" role="alert">
+                    {targetError}
+                  </span>
+                )}
               </div>
               <Button type="submit" variant="primary" disabled={saving}>
                 {saving ? 'Saving...' : 'Update Target'}
