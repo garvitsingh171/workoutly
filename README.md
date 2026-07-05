@@ -137,6 +137,32 @@ Default exercises are available from the API even before seeding. To store the d
 cd server
 npm run seed:exercises
 
+## Demo Data Seed
+
+To create realistic local/demo data for dashboards, workout history, progress charts, routines, streaks, records, and empty states, run from the repo root:
+
+npm run seed
+
+The demo seed is guarded for development/test/demo/local environments only. It refreshes only stable `@demo.workoutly.com` accounts and their owned data, then recreates demo users, routines, completed sessions, goals, and personal records around `2026-07-05` by default.
+
+If you intentionally want to seed the production Atlas database with demo users, run:
+
+SEED_PRODUCTION_CONFIRM=workoutly-prod npm run seed -- --allow-production
+
+This production override still refreshes only stable `@demo.workoutly.com` accounts and their owned data.
+
+Recommended login:
+
+- Email: casey.consistent@demo.workoutly.com
+- Password: DemoPass123!
+
+Empty-state login:
+
+- Email: erin.empty@demo.workoutly.com
+- Password: DemoPass123!
+
+See [docs/DEMO_SEEDING.md](docs/DEMO_SEEDING.md) for all demo users, safety rules, generated data, and supported schema limits.
+
 ## Error Handling Contract
 
 Backend error responses follow:
