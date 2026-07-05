@@ -1010,18 +1010,18 @@ describe('Exercise Library Routes', () => {
       .post('/api/exercises')
       .set('Authorization', `Bearer ${user.token}`)
       .send({
-        name: 'Incline Dumbbell Press',
+        name: 'Tempo Landmine Press',
         category: 'chest',
-        equipment: 'dumbbell',
+        equipment: 'barbell',
       });
 
     const listRes = await request(app)
-      .get('/api/exercises?search=incline')
+      .get('/api/exercises?search=landmine')
       .set('Authorization', `Bearer ${user.token}`);
 
     expect(createRes.status).toBe(201);
     expect(createRes.body.data).toHaveProperty('isDefault', false);
     expect(listRes.body.data).toHaveLength(1);
-    expect(listRes.body.data[0]).toHaveProperty('name', 'Incline Dumbbell Press');
+    expect(listRes.body.data[0]).toHaveProperty('name', 'Tempo Landmine Press');
   });
 });
