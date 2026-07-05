@@ -19,6 +19,18 @@ const exerciseSchema = new mongoose.Schema(
       max: [100, 'Reps cannot exceed 100'],
       required: [true, 'Reps are required'],
     },
+    restSeconds: {
+      type: Number,
+      min: [0, 'Rest time cannot be negative'],
+      max: [600, 'Rest time cannot exceed 600 seconds'],
+      default: 90,
+    },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [240, 'Exercise notes cannot exceed 240 characters'],
+      default: '',
+    },
   },
   { _id: false }
 );

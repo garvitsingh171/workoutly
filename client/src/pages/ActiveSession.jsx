@@ -90,7 +90,13 @@ const ActiveSession = () => {
       };
 
       if (isCompleting) {
-        startRestTimer(90);
+        const restSeconds = Number(newData[exIndex].restSeconds) || 0;
+
+        if (restSeconds > 0) {
+          startRestTimer(restSeconds);
+        } else {
+          stopRestTimer();
+        }
       } else {
         stopRestTimer();
       }
@@ -222,7 +228,11 @@ const ActiveSession = () => {
           <Card key={exIndex} className="session-exercise-card">
             <Card.Header className="session-exercise-header">
               <h2>{exercise.name}</h2>
-              <p>Target: {exercise.sets} sets x {exercise.reps} reps</p>
+              <p>
+                Target: {exercise.sets} sets x {exercise.reps} reps
+                {Number(exercise.restSeconds) > 0 ? ` - ${exercise.restSeconds}s rest` : ''}
+              </p>
+              {exercise.notes && <p className="session-exercise-header__notes">{exercise.notes}</p>}
             </Card.Header>
 
             <div className="session-set-list">

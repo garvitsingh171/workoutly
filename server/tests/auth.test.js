@@ -47,6 +47,8 @@ const validWorkoutPayload = (name = 'Push Day') => ({
       name: 'Push Ups',
       sets: 3,
       reps: 12,
+      restSeconds: 75,
+      notes: 'Keep elbows tucked',
     },
   ],
 });
@@ -305,6 +307,10 @@ describe('Workout Routes', () => {
     expect(res.body).toHaveProperty('success', true);
     expect(res.body.data).toHaveProperty('name', 'Push Day');
     expect(res.body.data).toHaveProperty('author');
+    expect(res.body.data.exercises[0]).toMatchObject({
+      restSeconds: 75,
+      notes: 'Keep elbows tucked',
+    });
   });
 
   test('should reject an invalid workout payload', async () => {
@@ -414,6 +420,10 @@ describe('Workout Routes', () => {
     expect(res.body.data).toHaveProperty('name', 'Duplicate Me Copy');
     expect(res.body.data).toHaveProperty('author');
     expect(res.body.data._id).not.toBe(createRes.body.data._id);
+    expect(res.body.data.exercises[0]).toMatchObject({
+      restSeconds: 75,
+      notes: 'Keep elbows tucked',
+    });
   });
 
   test('should keep duplicated workout names within the max length', async () => {

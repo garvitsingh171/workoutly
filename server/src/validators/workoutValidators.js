@@ -45,6 +45,16 @@ const workoutValidator = [
     .isInt({ min: 1, max: 100 })
     .withMessage('Exercise reps must be between 1 and 100')
     .toInt(),
+  body('exercises.*.restSeconds')
+    .optional({ nullable: true })
+    .isInt({ min: 0, max: 600 })
+    .withMessage('Exercise rest must be between 0 and 600 seconds')
+    .toInt(),
+  body('exercises.*.notes')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ max: 240 })
+    .withMessage('Exercise notes cannot exceed 240 characters'),
 ];
 
 module.exports = {
