@@ -22,7 +22,7 @@ const mergeExercisesByName = (databaseExercises, userId) => {
   defaultExercises.forEach((exercise) => {
     exerciseMap.set(exercise.name.toLowerCase(), {
       ...exercise,
-      instructions: '',
+      instructions: exercise.instructions || '',
       isDefault: true,
       createdBy: null,
     });
