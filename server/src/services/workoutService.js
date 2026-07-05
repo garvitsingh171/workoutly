@@ -11,6 +11,16 @@ const parsePositiveInteger = (value, fallback) => {
   return parsed;
 };
 
+const parseRestSeconds = (value) => {
+  const parsed = Number.parseInt(value, 10);
+
+  if (Number.isNaN(parsed)) {
+    return 90;
+  }
+
+  return Math.min(Math.max(parsed, 0), 600);
+};
+
 const buildWorkoutPayload = (body) => {
   const normalizedCoverImage =
     typeof body.coverImage === 'string' && body.coverImage.trim().length > 0
@@ -23,6 +33,8 @@ const buildWorkoutPayload = (body) => {
       name: exercise.name.trim(),
       sets: exercise.sets,
       reps: exercise.reps,
+      restSeconds: parseRestSeconds(exercise.restSeconds),
+      notes: typeof exercise.notes === 'string' ? exercise.notes.trim() : '',
     })),
     duration: body.duration,
     notes: typeof body.notes === 'string' ? body.notes.trim() : '',
@@ -152,6 +164,8 @@ const duplicateWorkout = async (workoutId, userId) => {
       name: exercise.name,
       sets: exercise.sets,
       reps: exercise.reps,
+      restSeconds: parseRestSeconds(exercise.restSeconds),
+      notes: exercise.notes || '',
     })),
     duration: workout.duration,
     difficulty: workout.difficulty,

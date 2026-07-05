@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -7,12 +7,82 @@ import socket from '../services/socket';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import ProgressInsights from '../components/dashboard/ProgressInsights';
+import AchievementSection from '../components/dashboard/AchievementSection';
 
 const getDifficultyColor = (difficulty) => {
   if (difficulty === 'beginner') return 'success';
   if (difficulty === 'intermediate') return 'warning';
   if (difficulty === 'advanced') return 'danger';
   return 'neutral';
+};
+
+const getUtcDateKey = (date) => date.toISOString().slice(0, 10);
+
+const labelize = (value) => {
+  const words = String(value || 'other').replace('_', ' ').split(' ');
+  return words.map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(' ');
+};
+
+const buildWeeklyActivity = (calendarDays) => {
+  const calendarLookup = calendarDays.reduce((lookup, day) => {
+    lookup.set(day.date, day);
+    return lookup;
+  }, new Map());
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() - (6 - index));
+    const dateKey = getUtcDateKey(date);
+    const summary = calendarLookup.get(dateKey);
+
+    return {
+      dateKey,
+      label: date.toLocaleDateString(undefined, { weekday: 'short' }),
+      sessionCount: summary?.sessionCount || 0,
+      totalVolume: summary?.totalVolume || 0,
+    };
+  });
+};
+
+const getMostTrainedGroup = ({ recentSessions, workouts, exerciseCategoryLookup }) => {
+  const categoryCounts = new Map();
+  const hasSessionData = recentSessions.length > 0;
+  const source = hasSessionData ? recentSessions : workouts;
+
+  const addExercise = (exercise, amount = 1) => {
+    const category = exerciseCategoryLookup.get(String(exercise.name || '').toLowerCase()) || 'other';
+    categoryCounts.set(category, (categoryCounts.get(category) || 0) + amount);
+  };
+
+  if (hasSessionData) {
+    source.forEach((session) => {
+      (session.exercises || []).forEach((exercise) => {
+        const completedSets = (exercise.sets || []).filter((set) => set.completed).length;
+        addExercise(exercise, completedSets || exercise.sets?.length || 1);
+      });
+    });
+  } else {
+    source.forEach((workout) => {
+      (workout.exercises || []).forEach((exercise) => {
+        addExercise(exercise, Number(exercise.sets) || 1);
+      });
+    });
+  }
+
+  const [category, count] = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0] || [];
+
+  if (!category) {
+    return null;
+  }
+
+  return {
+    label: labelize(category),
+    detail: `${count} ${hasSessionData ? 'sets logged' : 'sets planned'}`,
+  };
 };
 
 const Dashboard = () => {
@@ -23,6 +93,11 @@ const Dashboard = () => {
   const [workouts, setWorkouts] = useState([]);
   const [workoutsLoading, setWorkoutsLoading] = useState(true);
   const [workoutsError, setWorkoutsError] = useState('');
+  const [recentSessions, setRecentSessions] = useState([]);
+  const [calendarDays, setCalendarDays] = useState([]);
+  const [exerciseOptions, setExerciseOptions] = useState([]);
+  const [insightsLoading, setInsightsLoading] = useState(true);
+  const [insightsError, setInsightsError] = useState('');
   const [actionError, setActionError] = useState('');
   const [summaryError, setSummaryError] = useState('');
   const [duplicatingWorkoutId, setDuplicatingWorkoutId] = useState('');
@@ -128,6 +203,43 @@ const Dashboard = () => {
     }
   }, []);
 
+  const fetchDashboardInsights = useCallback(async () => {
+    setInsightsLoading(true);
+    setInsightsError('');
+
+    const [recentResult, calendarResult, exercisesResult] = await Promise.allSettled([
+      api.get('/api/sessions/recent'),
+      api.get('/api/sessions/calendar'),
+      api.get('/api/exercises'),
+    ]);
+
+    const errors = [];
+
+    if (recentResult.status === 'fulfilled') {
+      setRecentSessions(recentResult.value.data.data || []);
+    } else {
+      errors.push(getErrorMessage(recentResult.reason, 'Failed to load recent sessions.'));
+    }
+
+    if (calendarResult.status === 'fulfilled') {
+      setCalendarDays(calendarResult.value.data.data || []);
+    } else {
+      errors.push(getErrorMessage(calendarResult.reason, 'Failed to load weekly activity.'));
+    }
+
+    if (exercisesResult.status === 'fulfilled') {
+      setExerciseOptions(exercisesResult.value.data.data || []);
+    } else {
+      errors.push(getErrorMessage(exercisesResult.reason, 'Failed to load muscle group data.'));
+    }
+
+    if (errors.length > 0) {
+      setInsightsError(errors[0]);
+    }
+
+    setInsightsLoading(false);
+  }, []);
+
   useEffect(() => {
     fetchWorkouts();
   }, [fetchWorkouts]);
@@ -139,6 +251,10 @@ const Dashboard = () => {
   useEffect(() => {
     fetchGoalSummary();
   }, [fetchGoalSummary]);
+
+  useEffect(() => {
+    fetchDashboardInsights();
+  }, [fetchDashboardInsights]);
 
   const handlePageChange = (page) => {
     if (page < 1 || page === currentPage) {
@@ -192,6 +308,20 @@ const Dashboard = () => {
   const totalRoutines = pagination.total || workouts.length;
   const totalVolume = Math.round(sessionSummary.totalVolume || 0);
   const athleteName = profile?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Athlete';
+  const weeklyActivity = useMemo(() => buildWeeklyActivity(calendarDays), [calendarDays]);
+  const exerciseCategoryLookup = useMemo(() => {
+    return exerciseOptions.reduce((lookup, exercise) => {
+      lookup.set(exercise.name.toLowerCase(), exercise.category || 'other');
+      return lookup;
+    }, new Map());
+  }, [exerciseOptions]);
+  const mostTrainedGroup = useMemo(
+    () => getMostTrainedGroup({ recentSessions, workouts, exerciseCategoryLookup }),
+    [exerciseCategoryLookup, recentSessions, workouts]
+  );
+  const recentSession = recentSessions[0] || sessionSummary.latestSession;
+  const useDemoInsights =
+    !insightsLoading && !recentSession && (sessionSummary.totalSessions || 0) === 0;
 
   if (loading) {
     return (
@@ -233,6 +363,7 @@ const Dashboard = () => {
         {workoutsError && <div className="alert alert-error">{workoutsError}</div>}
         {actionError && <div className="alert alert-error">{actionError}</div>}
         {summaryError && <div className="alert alert-error">{summaryError}</div>}
+        {insightsError && <div className="alert alert-error">{insightsError}</div>}
 
         <div className="stats-grid" aria-label="Workout summary">
           <article className="stat-card">
@@ -267,6 +398,22 @@ const Dashboard = () => {
             </article>
           )}
         </div>
+
+        <ProgressInsights
+          loading={insightsLoading}
+          isDemo={useDemoInsights}
+          totalWorkouts={sessionSummary.totalSessions || 0}
+          weeklyActivity={weeklyActivity}
+          streakDays={sessionSummary.currentStreakDays || goalSummary?.currentStreakDays || 0}
+          mostTrainedGroup={mostTrainedGroup}
+          recentSession={recentSession}
+        />
+
+        <AchievementSection
+          summary={sessionSummary}
+          goalSummary={goalSummary}
+          loading={insightsLoading}
+        />
 
         <div className="dashboard-toolbar">
           <div>
@@ -334,6 +481,7 @@ const Dashboard = () => {
                       {(workout.exercises || []).slice(0, 3).map((exercise, index) => (
                         <li key={index} className="workout-card__exercise">
                           {exercise.sets}x{exercise.reps} {exercise.name}
+                          {Number(exercise.restSeconds) > 0 ? ` - ${exercise.restSeconds}s rest` : ''}
                         </li>
                       ))}
                       {workout.exercises?.length > 3 && (

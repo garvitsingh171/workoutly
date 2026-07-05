@@ -32,10 +32,23 @@ export const validateWorkoutForm = (formData) => {
       currentErrors.reps = 'Reps must be between 1 and 100.';
     }
 
+    if (!isIntegerInRange(exercise.restSeconds, 0, 600)) {
+      currentErrors.restSeconds = 'Rest must be between 0 and 600 seconds.';
+    }
+
+    if ((exercise.notes || '').trim().length > 240) {
+      currentErrors.notes = 'Exercise notes cannot exceed 240 characters.';
+    }
+
     if (Object.keys(currentErrors).length > 0) {
       exerciseErrors[index] = currentErrors;
     }
   });
+
+  if (formData.exercises.length === 0) {
+    errors.exercises = [];
+    errors.exercises._error = 'Add at least one exercise.';
+  }
 
   if (exerciseErrors.length > 0) {
     errors.exercises = exerciseErrors;
