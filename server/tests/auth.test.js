@@ -711,6 +711,8 @@ describe('Workout Session Routes', () => {
     expect(res.body.data).toHaveProperty('totalSessions', 2);
     expect(res.body.data).toHaveProperty('totalCompletedSets', 4);
     expect(res.body.data).toHaveProperty('totalVolume', 260);
+    expect(res.body.data).toHaveProperty('totalDurationMinutes', 60);
+    expect(res.body.data).toHaveProperty('averageDurationMinutes', 30);
     expect(res.body.data).toHaveProperty('sessionsThisWeek');
     expect(res.body.data).toHaveProperty('latestSession');
   });

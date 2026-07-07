@@ -7,7 +7,7 @@ const ConnectionTest = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const frontendUrl = window.location.origin;
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'Same origin / Vite proxy';
 
   const testConnection = async () => {
     setLoading(true);

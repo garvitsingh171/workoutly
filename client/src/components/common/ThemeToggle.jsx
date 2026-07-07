@@ -8,31 +8,25 @@ const themeOptions = [
 
 const ThemeToggle = () => {
   const { themePreference, resolvedTheme, setThemePreference } = useTheme();
+  const currentIndex = themeOptions.findIndex((option) => option.value === themePreference);
+  const currentTheme = themeOptions[currentIndex] || themeOptions[0];
+  const nextTheme = themeOptions[(currentIndex + 1) % themeOptions.length] || themeOptions[0];
+
+  const handleCycleTheme = () => {
+    setThemePreference(nextTheme.value);
+  };
 
   return (
-    <div className="theme-toggle" aria-label={`Theme selector. Current theme is ${themePreference}.`}>
-      <span className="theme-toggle__label">Theme</span>
-      <div className="theme-toggle__options" role="group" aria-label="Choose color theme">
-        {themeOptions.map((option) => {
-          const isActive = themePreference === option.value;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              className={`theme-toggle__option ${isActive ? 'theme-toggle__option--active' : ''}`.trim()}
-              onClick={() => setThemePreference(option.value)}
-              aria-pressed={isActive}
-              aria-label={`Use ${option.label} theme`}
-              title={option.value === 'system' ? `System (${resolvedTheme})` : option.label}
-            >
-              <span className="theme-toggle__mark" aria-hidden="true">{option.shortLabel}</span>
-              <span>{option.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={handleCycleTheme}
+      aria-label={`Theme is ${currentTheme.label}. Switch to ${nextTheme.label}.`}
+      title={`Theme: ${currentTheme.label}${themePreference === 'system' ? ` (${resolvedTheme})` : ''}`}
+    >
+      <span className="theme-toggle__mark" aria-hidden="true">{currentTheme.shortLabel}</span>
+      <span className="theme-toggle__text">{currentTheme.label}</span>
+    </button>
   );
 };
 

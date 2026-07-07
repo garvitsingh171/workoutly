@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 const User = require('./src/models/User');
 const { verifyAccessToken } = require('./src/utils/token');
+const { getAllowedOrigins } = require('./src/config/cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
@@ -15,11 +16,6 @@ connectDB();
 
 const httpServer = createServer(app);
 
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
 const io = new Server(httpServer, {
   cors: {
     origin(origin, callback) {
@@ -27,11 +23,11 @@ const io = new Server(httpServer, {
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
+      if (getAllowedOrigins().includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(new Error('Not allowed by CORS'));
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
     },
     methods: ['GET', 'POST'],
     credentials: true

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { corsOptions } = require('./src/config/cors');
 const { notFound, errorHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
@@ -9,29 +10,7 @@ app.locals.io = {
   emit: () => {},
 };
 
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow requests without Origin header (health checks, curl, Postman).
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
