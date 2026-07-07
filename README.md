@@ -143,7 +143,7 @@ To create realistic local/demo data for dashboards, workout history, progress ch
 
 npm run seed
 
-The demo seed is guarded for development/test/demo/local environments only. It refreshes only stable `@demo.workoutly.com` accounts and their owned data, then recreates demo users, routines, completed sessions, goals, and personal records around `2026-07-05` by default.
+The demo seed is guarded for development/test/demo/local environments only. It refreshes only stable `@demo.workoutly.com` accounts and their owned data, then recreates demo users, routines, completed sessions, goals, and personal records around the current date by default. Set `SEED_BASE_DATE=YYYY-MM-DD` to pin a specific demo date.
 
 If you intentionally want to seed the production Atlas database with demo users, run:
 

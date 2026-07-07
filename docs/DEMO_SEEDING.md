@@ -28,7 +28,7 @@ The script reads `server/.env` and uses `MONGO_URI` unless `NODE_ENV=test`, wher
 
 ## Base Date
 
-By default the data is generated around `2026-07-05`, matching the current project date used for this demo pass.
+By default the data is generated around the current date, so dashboards, streaks, and calendar summaries stay fresh when the seed is rerun.
 
 To regenerate around another date:
 
@@ -69,9 +69,10 @@ erin.empty@demo.workoutly.com
 
 - 7 stable demo users/personas.
 - 65 default exercises across the schema-supported categories and equipment values.
-- 9 reusable routine definitions and 14 user-owned routine copies spread across demo users.
+- 14 reusable routine definitions and 16 user-owned routine copies spread across demo users.
 - 100+ completed workout sessions across the last 90 days.
-- Sessions in the last 30 days, current week, yesterday, and today.
+- Casey's account includes a realistic Monday upper strength, Tuesday Zone 2 run, Wednesday mobility/core, Thursday lower strength, Saturday conditioning pattern across roughly the last four weeks, with rest days and a few missed sessions.
+- Sessions in the last 30 days, current week, yesterday, and today where the generated calendar supports it.
 - 500+ embedded set logs with completed and partial sessions.
 - Active weekly goals for each demo user.
 - Personal records rebuilt from seeded sessions.

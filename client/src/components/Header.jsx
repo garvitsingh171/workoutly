@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './ui/Button';
 import ThemeToggle from './common/ThemeToggle';
@@ -14,41 +13,18 @@ const authenticatedNavItems = [
 ];
 
 const getNavLinkClassName = ({ isActive }) =>
-  `site-header__link ${isActive ? 'site-header__link--active' : ''}`.trim();
+  `site-header__app-link ${isActive ? 'site-header__app-link--active' : ''}`.trim();
 
 const Header = () => {
   const { isAuthenticated, logout, user } = useAuth();
-  const location = useLocation();
-  const [openMenuPath, setOpenMenuPath] = useState(null);
   const firstName = user?.name?.split(' ')[0];
   const userInitial = firstName?.charAt(0)?.toUpperCase();
   const authenticated = isAuthenticated();
-  const isMenuOpen = openMenuPath === location.pathname;
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setOpenMenuPath(null);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const handleLogout = () => {
-    setOpenMenuPath(null);
-    logout();
-  };
-
-  const handleMenuToggle = () => {
-    setOpenMenuPath((currentPath) => (currentPath === location.pathname ? null : location.pathname));
-  };
 
   return (
-    <header className={`site-header ${isMenuOpen ? 'site-header--menu-open' : ''}`.trim()}>
-      <div className="site-header__inner">
-        <Link to="/" className="site-header__logo-link" onClick={() => setOpenMenuPath(null)}>
+    <header className="site-header">
+      <div className="site-header__topbar">
+        <Link to="/" className="site-header__logo-link">
           <img
             src="/workoutly.png"
             alt=""
@@ -63,67 +39,44 @@ const Header = () => {
           </span>
         </Link>
 
-        <button
-          type="button"
-          className="site-header__menu-btn"
-          onClick={handleMenuToggle}
-          aria-expanded={isMenuOpen}
-          aria-controls="site-primary-nav"
-        >
-          <span className="sr-only">{isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}</span>
-          <span className="site-header__menu-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-
-        <nav
-          id="site-primary-nav"
-          className={`site-header__nav ${isMenuOpen ? 'site-header__nav--open' : ''}`.trim()}
-          aria-label="Primary navigation"
-        >
+        <div className={`site-header__actions ${authenticated ? '' : 'site-header__actions--guest'}`.trim()}>
+          <ThemeToggle />
           {authenticated ? (
             <>
-              <div className="site-header__primary-links">
-                {authenticatedNavItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={getNavLinkClassName}
-                    onClick={() => setOpenMenuPath(null)}
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
-              </div>
-
-              <div className="site-header__actions">
-                {firstName && (
-                  <span className="site-header__user-text">
-                    {userInitial && <span className="site-header__user-avatar" aria-hidden="true">{userInitial}</span>}
-                    <span>Hi, {firstName}</span>
-                  </span>
-                )}
-                <ThemeToggle />
-                <button type="button" onClick={handleLogout} className="site-header__logout-btn">
-                  Logout
-                </button>
-              </div>
+              {firstName && (
+                <span className="site-header__user-text">
+                  {userInitial && <span className="site-header__user-avatar" aria-hidden="true">{userInitial}</span>}
+                  <span>Hi, {firstName}</span>
+                </span>
+              )}
+              <button type="button" onClick={logout} className="site-header__logout-btn">
+                Logout
+              </button>
             </>
           ) : (
-            <div className="site-header__actions site-header__actions--guest">
-              <NavLink to="/login" className={getNavLinkClassName} onClick={() => setOpenMenuPath(null)}>
+            <>
+              <NavLink to="/login" className="site-header__auth-link">
                 Login
               </NavLink>
-              <ThemeToggle />
-              <Button as={Link} to="/register" variant="primary" size="sm" onClick={() => setOpenMenuPath(null)}>
+              <Button as={Link} to="/register" variant="primary" size="sm">
                 Register
               </Button>
-            </div>
+            </>
           )}
-        </nav>
+        </div>
       </div>
+
+      {authenticated && (
+        <nav id="site-primary-nav" className="site-header__app-nav" aria-label="Primary navigation">
+          <div className="site-header__app-nav-track">
+            {authenticatedNavItems.map((item) => (
+              <NavLink key={item.to} to={item.to} className={getNavLinkClassName}>
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      )}
     </header>
   );
 };

@@ -269,10 +269,11 @@ const getSessions = async (req, res, next) => {
     const limit = Math.min(requestedLimit, 50);
     const skip = (page - 1) * limit;
     const filter = buildSessionFilter(req.query, req.user._id, { includeWorkoutName: true });
+    const sortDirection = req.query.sort === 'oldest' ? 1 : -1;
 
     const [sessions, total] = await Promise.all([
       WorkoutSession.find(filter)
-        .sort({ completedAt: -1 })
+        .sort({ completedAt: sortDirection })
         .skip(skip)
         .limit(limit),
       WorkoutSession.countDocuments(filter),
@@ -413,6 +414,7 @@ const getSessionSummary = async (req, res, next) => {
         totalSessions: totals.totalSessions + 1,
         totalCompletedSets: totals.totalCompletedSets + (session.totalCompletedSets || 0),
         totalVolume: totals.totalVolume + (session.totalVolume || 0),
+        totalDurationMinutes: totals.totalDurationMinutes + (session.durationMinutes || 0),
         sessionsThisWeek:
           session.completedAt >= startOfWeek ? totals.sessionsThisWeek + 1 : totals.sessionsThisWeek,
       }),
@@ -420,12 +422,16 @@ const getSessionSummary = async (req, res, next) => {
         totalSessions: 0,
         totalCompletedSets: 0,
         totalVolume: 0,
+        totalDurationMinutes: 0,
         sessionsThisWeek: 0,
       }
     );
 
     return sendSuccess(res, 200, 'Workout session summary fetched successfully', {
       ...summary,
+      averageDurationMinutes: summary.totalSessions
+        ? Math.round(summary.totalDurationMinutes / summary.totalSessions)
+        : 0,
       latestSession: sessions[0] || null,
       currentStreakDays: calculateCurrentStreakDays(sessions),
     });

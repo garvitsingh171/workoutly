@@ -105,6 +105,8 @@ const Dashboard = () => {
     totalSessions: 0,
     totalCompletedSets: 0,
     totalVolume: 0,
+    totalDurationMinutes: 0,
+    averageDurationMinutes: 0,
     latestSession: null,
     sessionsThisWeek: 0,
     currentStreakDays: 0,
@@ -307,6 +309,11 @@ const Dashboard = () => {
 
   const totalRoutines = pagination.total || workouts.length;
   const totalVolume = Math.round(sessionSummary.totalVolume || 0);
+  const totalMinutes = Math.round(sessionSummary.totalDurationMinutes || 0);
+  const averageDurationMinutes = Math.round(sessionSummary.averageDurationMinutes || 0);
+  const weeklyTarget = goalSummary?.weeklyWorkoutTarget || 0;
+  const weeklyCompletionPercent = goalSummary?.weeklyProgressPercent
+    ?? (weeklyTarget ? Math.min(100, Math.round(((sessionSummary.sessionsThisWeek || 0) / weeklyTarget) * 100)) : 0);
   const athleteName = profile?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Athlete';
   const weeklyActivity = useMemo(() => buildWeeklyActivity(calendarDays), [calendarDays]);
   const exerciseCategoryLookup = useMemo(() => {
@@ -377,14 +384,31 @@ const Dashboard = () => {
             <p className="stat-card__hint">Finished workouts saved</p>
           </article>
           <article className="stat-card">
+            <p className="stat-card__label">Minutes trained</p>
+            <p className="stat-card__value">{totalMinutes}</p>
+            <p className="stat-card__hint">Lifetime logged training time</p>
+          </article>
+          <article className="stat-card">
             <p className="stat-card__label">Sessions this week</p>
             <p className="stat-card__value">{sessionSummary.sessionsThisWeek || 0}</p>
             <p className="stat-card__hint">Since the start of this week</p>
           </article>
           <article className="stat-card">
+            <p className="stat-card__label">Weekly completion</p>
+            <p className="stat-card__value">{weeklyCompletionPercent}%</p>
+            <p className="stat-card__hint">
+              {weeklyTarget ? `${sessionSummary.sessionsThisWeek || 0} / ${weeklyTarget} target sessions` : 'Set a weekly goal'}
+            </p>
+          </article>
+          <article className="stat-card">
             <p className="stat-card__label">Total volume</p>
             <p className="stat-card__value">{totalVolume}</p>
             <p className="stat-card__hint">{sessionSummary.totalCompletedSets || 0} completed sets</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-card__label">Average session</p>
+            <p className="stat-card__value">{averageDurationMinutes}</p>
+            <p className="stat-card__hint">Minutes per completed workout</p>
           </article>
           {goalSummary && (
             <article className="stat-card dashboard-goal-card">

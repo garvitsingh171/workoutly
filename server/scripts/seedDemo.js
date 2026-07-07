@@ -13,7 +13,7 @@ const defaultExercises = require('../src/data/defaultExercises');
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
-const DEFAULT_BASE_DATE = '2026-07-05';
+const getDefaultBaseDateText = () => new Date().toISOString().slice(0, 10);
 const DEMO_PASSWORD = 'DemoPass123!';
 const ALLOWED_NODE_ENVS = new Set(['development', 'test', 'demo', 'local']);
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -86,12 +86,28 @@ const DEMO_PERSONAS = [
     name: 'Casey Consistent',
     email: 'casey.consistent@demo.workoutly.com',
     weeklyTarget: 5,
-    strengthScale: 1.0,
-    progressRate: 1.9,
-    preferredHour: 5,
-    partialRate: 0.04,
-    routineKeys: ['strength-builder', 'fat-loss-cardio-strength', 'core-mobility'],
-    shouldTrain: (offset, date) => offset >= -24 || ([1, 3, 5].includes(date.getUTCDay()) && Math.abs(offset) % 11 !== 0),
+    strengthScale: 1.02,
+    progressRate: 1.7,
+    preferredHour: 6,
+    partialRate: 0.08,
+    routineKeys: [
+      'casey-upper-strength',
+      'casey-zone-2-run',
+      'casey-mobility-core',
+      'casey-lower-strength',
+      'casey-full-body-conditioning',
+    ],
+    routineByDay: {
+      1: 'casey-upper-strength',
+      2: 'casey-zone-2-run',
+      3: 'casey-mobility-core',
+      4: 'casey-lower-strength',
+      6: 'casey-full-body-conditioning',
+    },
+    shouldTrain: (offset, date) =>
+      offset >= -27
+      && [1, 2, 3, 4, 6].includes(date.getUTCDay())
+      && ![-19, -11, -5].includes(offset),
   },
   {
     key: 'empty',
@@ -191,6 +207,74 @@ const ROUTINES = {
       { name: 'Thoracic Rotation', sets: 2, reps: 8, restSeconds: 20, notes: 'Each side.' },
       { name: "World's Greatest Stretch", sets: 2, reps: 6, restSeconds: 20, notes: 'Each side.' },
       { name: 'Foam Rolling', sets: 1, reps: 8, restSeconds: 15, notes: 'Gentle pressure.' },
+    ],
+  },
+  'casey-upper-strength': {
+    name: 'Upper Body Strength',
+    difficulty: 'intermediate',
+    duration: 58,
+    goal: 'Build pressing and pulling strength with repeatable weekly volume.',
+    scheduleDays: [1],
+    exercises: [
+      { name: 'Bench Press', sets: 4, reps: 6, restSeconds: 150, notes: 'Top set should feel heavy but clean.' },
+      { name: 'Pull Up', sets: 4, reps: 7, restSeconds: 120, notes: 'Use full range and controlled negatives.' },
+      { name: 'Incline Dumbbell Press', sets: 3, reps: 9, restSeconds: 105, notes: 'Pause briefly in the bottom position.' },
+      { name: 'Seated Cable Row', sets: 3, reps: 10, restSeconds: 90, notes: 'Drive elbows back and avoid shrugging.' },
+      { name: 'Face Pull', sets: 3, reps: 14, restSeconds: 60, notes: 'Keep this light and crisp.' },
+    ],
+  },
+  'casey-zone-2-run': {
+    name: 'Zone 2 Run',
+    difficulty: 'beginner',
+    duration: 42,
+    goal: 'Build aerobic base with conversational effort and relaxed pacing.',
+    scheduleDays: [2],
+    exercises: [
+      { name: 'Running', sets: 1, reps: 35, restSeconds: 0, notes: 'Treat reps as minutes at easy conversational pace.' },
+      { name: 'Hip Flexor Stretch', sets: 2, reps: 8, restSeconds: 20, notes: 'Open hips after the run.' },
+      { name: 'Cat Cow', sets: 2, reps: 8, restSeconds: 20, notes: 'Downshift breathing before wrapping up.' },
+    ],
+  },
+  'casey-mobility-core': {
+    name: 'Mobility + Core',
+    difficulty: 'beginner',
+    duration: 34,
+    goal: 'Keep recovery honest while building trunk control.',
+    scheduleDays: [3],
+    exercises: [
+      { name: 'Dead Bug', sets: 3, reps: 10, restSeconds: 30, notes: 'Slow opposite arm and leg.' },
+      { name: 'Plank', sets: 3, reps: 50, restSeconds: 45, notes: 'Treat reps as seconds.' },
+      { name: 'Cable Wood Chop', sets: 3, reps: 12, restSeconds: 45, notes: 'Each side with stable hips.' },
+      { name: "World's Greatest Stretch", sets: 2, reps: 6, restSeconds: 20, notes: 'Each side, pause where tight.' },
+      { name: 'Foam Rolling', sets: 1, reps: 8, restSeconds: 15, notes: 'Spend extra time on quads and lats.' },
+    ],
+  },
+  'casey-lower-strength': {
+    name: 'Lower Body Strength',
+    difficulty: 'intermediate',
+    duration: 62,
+    goal: 'Progress squat and hinge strength without burying recovery.',
+    scheduleDays: [4],
+    exercises: [
+      { name: 'Squat', sets: 5, reps: 5, restSeconds: 150, notes: 'Add load only when bar speed stays strong.' },
+      { name: 'Romanian Deadlift', sets: 4, reps: 8, restSeconds: 120, notes: 'Hips back and lats tight.' },
+      { name: 'Bulgarian Split Squat', sets: 3, reps: 10, restSeconds: 90, notes: 'Each side with controlled depth.' },
+      { name: 'Leg Curl', sets: 3, reps: 12, restSeconds: 75, notes: 'Squeeze hamstrings at the top.' },
+      { name: 'Standing Calf Raise', sets: 4, reps: 14, restSeconds: 60, notes: 'Full stretch and full lockout.' },
+    ],
+  },
+  'casey-full-body-conditioning': {
+    name: 'Full Body Conditioning',
+    difficulty: 'intermediate',
+    duration: 48,
+    goal: 'Finish the week with athletic full-body work and moderate conditioning.',
+    scheduleDays: [6],
+    exercises: [
+      { name: 'Rowing Machine', sets: 4, reps: 4, restSeconds: 60, notes: 'Treat reps as minutes at strong but sustainable pace.' },
+      { name: 'Kettlebell Swing', sets: 4, reps: 18, restSeconds: 60, notes: 'Power comes from hips, not shoulders.' },
+      { name: 'Thruster', sets: 3, reps: 10, restSeconds: 75, notes: 'Smooth squat into press.' },
+      { name: 'Farmer Carry', sets: 3, reps: 45, restSeconds: 75, notes: 'Treat reps as meters.' },
+      { name: 'Bicycle Crunch', sets: 3, reps: 22, restSeconds: 45, notes: 'Controlled rotation.' },
     ],
   },
   'push-day': {
@@ -301,7 +385,7 @@ const hashString = (value) => {
 };
 
 const parseBaseDate = () => {
-  const dateText = process.env.SEED_BASE_DATE || DEFAULT_BASE_DATE;
+  const dateText = process.env.SEED_BASE_DATE || getDefaultBaseDateText();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
     throw new Error('SEED_BASE_DATE must use YYYY-MM-DD format.');
   }
@@ -646,7 +730,7 @@ const createSessions = async (usersByPersona, workoutsByPersona, baseDate) => {
     const dates = buildTrainingDates(persona, baseDate);
 
     dates.forEach(({ date, offset }, index) => {
-      const routineKey = persona.routineKeys[index % persona.routineKeys.length];
+      const routineKey = persona.routineByDay?.[date.getUTCDay()] || persona.routineKeys[index % persona.routineKeys.length];
       const routine = ROUTINES[routineKey];
       const workout = workoutsByPersona.get(persona.key).get(routineKey);
 
@@ -742,8 +826,8 @@ const buildPlannedSummary = (baseDate) => {
 
     if (persona.routineKeys.length === 0) return;
 
-    buildTrainingDates(persona, baseDate).forEach((_, index) => {
-      const routineKey = persona.routineKeys[index % persona.routineKeys.length];
+    buildTrainingDates(persona, baseDate).forEach(({ date }, index) => {
+      const routineKey = persona.routineByDay?.[date.getUTCDay()] || persona.routineKeys[index % persona.routineKeys.length];
       const routine = ROUTINES[routineKey];
       sessions += 1;
       totalSetLogs += routine.exercises.reduce((sum, exercise) => sum + exercise.sets, 0);
