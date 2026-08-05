@@ -3,7 +3,7 @@
 ## Setup
 
 1. Install Postman desktop app from https://www.postman.com/downloads/.
-2. Import collection: docs/Creator-Platform-API.postman_collection.json.
+2. Import collection: docs/Workoutly-API.postman_collection.json.
 3. Import environment: docs/Local-Development.postman_environment.json.
 4. Select Local Development environment in Postman (top-right dropdown).
 
@@ -72,6 +72,6 @@ Collection folder names remain Health/Auth/Posts to match assignment rubric.
 
 Ensure these files are committed:
 
-- docs/Creator-Platform-API.postman_collection.json
+- docs/Workoutly-API.postman_collection.json
 - docs/Local-Development.postman_environment.json
 - docs/POSTMAN_GUIDE.md

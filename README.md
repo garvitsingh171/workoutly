@@ -8,6 +8,10 @@ Workoutly is a full-stack MERN workout tracker where users can register, log in,
 - Backend: Node.js, Express, MongoDB, Mongoose, JWT, bcrypt
 - Tooling: ESLint, Nodemon, Concurrently
 
+## Documentation
+
+Start with the [Workoutly documentation index](docs/README.md) for repository-backed product, architecture, engineering, deployment, security, testing, contributing, and interview-preparation documentation.
+
 ## Project Structure
 
 project-root/
