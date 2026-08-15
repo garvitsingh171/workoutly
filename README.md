@@ -269,4 +269,5 @@ Optional image tags:
 $env:CLIENT_IMAGE_TAG="latest"
 $env:SERVER_IMAGE_TAG="latest"
 
+
 This split keeps local development fast with docker-compose.yml while making deployment reproducible with prebuilt images in docker-compose.prod.yml.
